@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sécurité Mobile & Web — CyberAcademy</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700;800&display=swap');
+:root{--bg:#020408;--bg2:#060d14;--panel:rgba(162,155,254,0.04);--border:rgba(162,155,254,0.18);--green:#00ff88;--cyan:#00e5ff;--red:#ff3860;--orange:#ff9f43;--yellow:#ffd32a;--purple:#a29bfe;--blue:#74b9ff;--text:#c8d6e5;--dim:rgba(200,214,229,0.5);--font-main:'Exo 2',sans-serif;--font-mono:'Share Tech Mono',monospace;--font-head:'Rajdhani',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--font-main);overflow-x:hidden;}
+body::after{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);pointer-events:none;z-index:1;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(2,4,8,0.92);border-bottom:1px solid var(--border);backdrop-filter:blur(14px);padding:0 40px;height:60px;display:flex;align-items:center;justify-content:space-between;}
+.nav-logo{font-family:var(--font-head);font-size:1.4rem;font-weight:700;color:var(--purple);letter-spacing:3px;text-decoration:none;}
+.nav-logo span{color:var(--text);}
+.nav-back{font-family:var(--font-mono);font-size:0.75rem;color:var(--dim);text-decoration:none;border:1px solid var(--border);padding:6px 16px;border-radius:3px;transition:all 0.2s;}
+.nav-back:hover{color:var(--purple);border-color:var(--purple);}
+.wrapper{position:relative;z-index:2;padding-top:60px;}
+section{padding:80px 80px;}
+.section-tag{font-family:var(--font-mono);font-size:0.65rem;color:var(--purple);letter-spacing:4px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:10px;}
+.section-tag::before{content:'//';color:var(--dim);}
+h1,h2{font-family:var(--font-head);font-weight:700;letter-spacing:1px;color:#fff;line-height:1.1;}
+h1{font-size:clamp(2.5rem,5vw,4.5rem);margin-bottom:16px;}
+h2{font-size:2rem;margin-bottom:20px;}
+h2 span{color:var(--purple);}
+p.lead{color:var(--dim);font-size:1rem;line-height:1.7;max-width:650px;margin-bottom:50px;}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:28px;margin-bottom:20px;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.code-block{background:#000;border:1px solid rgba(255,255,255,0.07);border-radius:6px;padding:20px 24px;font-family:var(--font-mono);font-size:0.82rem;line-height:1.9;overflow-x:auto;margin:16px 0;}
+.cmt{color:#455a64;font-style:italic;}.hi{color:#a29bfe;font-weight:700;}.val{color:#81c784;}.kw{color:#ffd32a;}.ok{color:var(--green);}.bad{color:var(--red);}
+.tag{display:inline-block;font-family:var(--font-mono);font-size:0.65rem;border:1px solid currentColor;padding:2px 8px;border-radius:2px;margin:3px;}
+.reveal{opacity:0;transform:translateY(20px);transition:opacity 0.5s,transform 0.5s;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+.btn-sm{background:transparent;color:var(--purple);border:1px solid var(--purple);font-family:var(--font-mono);font-size:0.75rem;padding:7px 16px;border-radius:3px;cursor:pointer;transition:all 0.2s;}
+.btn-sm:hover{background:rgba(162,155,254,0.1);}
+
+/* OWASP top 10 */
+.owasp-list{display:flex;flex-direction:column;gap:10px;}
+.owasp-item{display:flex;align-items:flex-start;gap:14px;padding:14px 18px;background:rgba(0,0,0,0.3);border:1px solid rgba(162,155,254,0.12);border-radius:6px;transition:all 0.2s;cursor:pointer;}
+.owasp-item:hover{border-color:var(--purple);background:var(--panel);}
+.owasp-item.expanded .owasp-detail{display:block;}
+.owasp-num{font-family:var(--font-head);font-size:1.1rem;font-weight:900;min-width:36px;color:var(--purple);}
+.owasp-name{font-family:var(--font-head);font-size:1rem;font-weight:700;color:#fff;margin-bottom:3px;}
+.owasp-short{font-size:0.78rem;color:var(--dim);}
+.owasp-detail{display:none;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.07);}
+.owasp-detail p{font-size:0.83rem;color:var(--dim);line-height:1.65;margin-bottom:8px;}
+.owasp-detail .example{background:#000;border-radius:4px;padding:10px 14px;font-family:var(--font-mono);font-size:0.75rem;margin-top:6px;}
+
+/* Android layers */
+.android-layers{display:flex;flex-direction:column;gap:0;border:1px solid var(--border);border-radius:6px;overflow:hidden;max-width:500px;}
+.al-layer{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;transition:background 0.2s;}
+.al-layer:last-child{border-bottom:none;}
+.al-layer:hover{background:var(--panel);}
+.al-icon{font-size:1.3rem;}
+.al-name{font-family:var(--font-head);font-size:0.95rem;font-weight:700;color:#fff;}
+.al-desc{font-size:0.78rem;color:var(--dim);}
+
+/* SQL injection demo */
+#sqliInput{background:rgba(0,0,0,0.5);border:1px solid var(--border);border-radius:4px;padding:10px 14px;color:#fff;font-family:var(--font-mono);font-size:0.88rem;width:100%;outline:none;margin-bottom:10px;}
+#sqliInput:focus{border-color:var(--purple);}
+#sqliResult{background:#000;border:1px solid var(--border);border-radius:4px;padding:14px;font-family:var(--font-mono);font-size:0.8rem;min-height:80px;line-height:1.7;}
+
+/* DDoS viz */
+.ddos-viz{display:flex;align-items:center;gap:20px;padding:20px;background:rgba(0,0,0,0.4);border-radius:6px;flex-wrap:wrap;}
+.zombie-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}
+.zombie{width:32px;height:32px;border-radius:4px;background:rgba(255,56,96,0.15);border:1px solid rgba(255,56,96,0.3);display:flex;align-items:center;justify-content:center;font-size:1rem;cursor:pointer;transition:all 0.3s;}
+.zombie.active{background:rgba(255,56,96,0.3);border-color:var(--red);animation:pulse 0.5s infinite;}
+@keyframes pulse{50%{transform:scale(1.1);box-shadow:0 0 8px var(--red);}}
+.ddos-server{padding:16px 20px;border:2px solid;border-radius:8px;text-align:center;min-width:100px;transition:all 0.3s;}
+
+@media(max-width:900px){section{padding:60px 24px;}.two-col{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">Cyber<span>Academy</span></a>
+  <a href="index.html" class="nav-back">← Retour accueil</a>
+</nav>
+<div class="wrapper">
+
+<!-- HERO -->
+<section style="background:var(--bg2);min-height:40vh;display:flex;flex-direction:column;justify-content:center;">
+  <div class="section-tag">Module 05</div>
+  <h1>Sécurité <span style="color:var(--purple);">Mobile & Web</span></h1>
+  <p class="lead">APK Android, sandbox, OWASP Top 10, injections SQL, XSS, DDoS, malwares — la sécurité des applications de A à Z, avec des démos interactives.</p>
+</section>
+
+<!-- ANDROID SECURITY -->
+<section>
+  <div class="section-tag">Android — Architecture de sécurité</div>
+  <h2>Sécurité <span>Android</span></h2>
+  <div class="two-col reveal">
+    <div>
+      <div style="font-family:var(--font-head);color:#fff;font-size:1.1rem;margin-bottom:16px;">🏗️ Architecture de sécurité Android</div>
+      <div class="android-layers">
+        <div class="al-layer" style="background:rgba(255,56,96,0.06);">
+          <span class="al-icon">⚙️</span>
+          <div><div class="al-name" style="color:var(--red);">Noyau Linux</div><div class="al-desc">Isolation des processus, permissions, SELinux</div></div>
+        </div>
+        <div class="al-layer" style="background:rgba(255,159,67,0.06);">
+          <span class="al-icon">🔒</span>
+          <div><div class="al-name" style="color:var(--orange);">Sandbox (bac à sable)</div><div class="al-desc">Chaque app tourne dans sa propre sandbox isolée</div></div>
+        </div>
+        <div class="al-layer" style="background:rgba(255,211,42,0.06);">
+          <span class="al-icon">🆔</span>
+          <div><div class="al-name" style="color:var(--yellow);">UID — User Identifier</div><div class="al-desc">Chaque app a un UID Linux unique → isolation totale</div></div>
+        </div>
+        <div class="al-layer" style="background:rgba(162,155,254,0.06);">
+          <span class="al-icon">📋</span>
+          <div><div class="al-name" style="color:var(--purple);">Permissions</div><div class="al-desc">Caméra, GPS, contacts — demandées explicitement</div></div>
+        </div>
+        <div class="al-layer" style="background:rgba(0,255,136,0.06);">
+          <span class="al-icon">🔐</span>
+          <div><div class="al-name" style="color:var(--green);">Keystore</div><div class="al-desc">Stockage sécurisé des clés cryptographiques</div></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="border-left:3px solid var(--purple);">
+        <div style="font-family:var(--font-head);color:var(--purple);font-size:1.1rem;margin-bottom:10px;">📦 APK — Android Package Kit</div>
+        <p style="font-size:0.84rem;color:var(--dim);line-height:1.65;margin-bottom:12px;">Un APK est une archive (comme un ZIP) contenant toute l'application Android. Il contient :</p>
+        <div class="code-block" style="font-size:0.75rem;">
+          <span class="hi">AndroidManifest.xml</span><br>
+          <span class="cmt"> → Permissions demandées, composants</span><br>
+          <span class="hi">classes.dex</span><br>
+          <span class="cmt"> → Le code Java/Kotlin compilé</span><br>
+          <span class="hi">resources.arsc</span><br>
+          <span class="cmt"> → Ressources (images, strings)</span><br>
+          <span class="hi">META-INF/</span><br>
+          <span class="cmt"> → Signature numérique de l'app</span><br>
+          <span class="hi">lib/</span><br>
+          <span class="cmt"> → Bibliothèques natives (.so)</span>
+        </div>
+      </div>
+      <div class="card" style="margin-top:14px;border-left:3px solid var(--red);">
+        <div style="font-family:var(--font-head);color:var(--red);font-size:1rem;margin-bottom:8px;">⚠️ APK malveillants</div>
+        <p style="font-size:0.83rem;color:var(--dim);line-height:1.65;">Les APK hors Play Store (sideloading) peuvent contenir des malwares. Des groupes Telegram distribuent des APK payants crackés contenant des backdoors, spywares ou ransomwares.</p>
+        <p style="font-size:0.82rem;color:var(--green);margin-top:8px;">✅ Vérification : SHA-256 sum du fichier APK. Si elle diffère de l'officielle → APK modifié !</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- OWASP TOP 10 -->
+<section style="background:var(--bg2);">
+  <div class="section-tag">Standard mondial</div>
+  <h2>OWASP <span>Top 10</span></h2>
+  <p style="color:var(--dim);font-size:0.9rem;line-height:1.65;max-width:700px;margin-bottom:20px;">L'OWASP (Open Web Application Security Project) publie les 10 vulnérabilités web les plus critiques. <strong style="color:#fff;">Clique sur chaque item</strong> pour voir les détails et un exemple.</p>
+
+  <div class="owasp-list reveal">
+    <div class="owasp-item" onclick="toggleOwasp(this)">
+      <div class="owasp-num">A01</div>
+      <div style="flex:1;">
+        <div class="owasp-name">Broken Access Control</div>
+        <div class="owasp-short">Contrôle d'accès défaillant — #1 depuis 2021</div>
+        <div class="owasp-detail">
+          <p>Un utilisateur peut accéder à des ressources ou effectuer des actions non autorisées. Exemple : l'URL /admin/users accessible sans être admin.</p>
+          <div class="example"><span style="color:var(--red);">GET /api/users/123/profile</span> <span style="color:var(--dim);">← Tu vois ton profil</span><br><span style="color:var(--red);">GET /api/users/124/profile</span> <span style="color:var(--orange);">← Tu vois le profil d'un autre !</span></div>
+          <p style="margin-top:8px;color:var(--green);font-size:0.8rem;">✅ Fix : Vérifier les autorisations côté serveur pour CHAQUE requête.</p>
+        </div>
+      </div>
+    </div>
+    <div class="owasp-item" onclick="toggleOwasp(this)">
+      <div class="owasp-num">A02</div>
+      <div style="flex:1;">
+        <div class="owasp-name">Cryptographic Failures</div>
+        <div class="owasp-short">Mauvais chiffrement des données sensibles</div>
+        <div class="owasp-detail">
+          <p>Données sensibles transmises en HTTP (pas HTTPS), mots de passe stockés en MD5, clés de chiffrement hardcodées dans le code source.</p>
+          <div class="example"><span style="color:var(--red);">password_hash = md5(password)</span>  <span style="color:var(--dim);">← CASSÉ !</span><br><span style="color:var(--green);">password_hash = bcrypt(password, 12)</span> <span style="color:var(--dim);">← Correct</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="owasp-item" onclick="toggleOwasp(this)">
+      <div class="owasp-num">A03</div>
+      <div style="flex:1;">
+        <div class="owasp-name">Injection (SQLi, XSS, LDAP...)</div>
+        <div class="owasp-short">Code malveillant injecté dans les entrées utilisateur</div>
+        <div class="owasp-detail">
+          <p><strong>SQL Injection</strong> : données utilisateur intégrées directement dans une requête SQL sans validation.</p>
+          <div class="example"><span style="color:var(--dim);">Requête vulnérable :</span><br><span style="color:var(--red);">SELECT * FROM users WHERE name='</span><span style="color:var(--orange);">' OR '1'='1</span><span style="color:var(--red);">'</span><br><span style="color:var(--dim);">→ Retourne TOUS les utilisateurs !</span><br><br><span style="color:var(--green);">Fix : requêtes préparées (parameterized queries)</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="owasp-item" onclick="toggleOwasp(this)">
+      <div class="owasp-num">A04</div>
+      <div style="flex:1;">
+        <div class="owasp-name">Insecure Design</div>
+        <div class="owasp-short">Failles dans la conception même de l'application</div>
+        <div class="owasp-detail">
+          <p>La sécurité doit être pensée DÈS la conception, pas ajoutée après. Ex: système de reset de mot de passe sans limite de tentatives → force brute possible.</p>
+        </div>
+      </div>
+    </div>
+    <div class="owasp-item" onclick="toggleOwasp(this)">
+      <div class="owasp-num">A05</div>
+      <div style="flex:1;">
+        <div class="owasp-name">Security Misconfiguration</div>
+        <div class="owasp-short">Configuration par défaut non sécurisée</div>
+        <div class="owasp-detail">
+          <p>Mots de passe par défaut ("admin/admin"), pages d'erreur qui révèlent la stack technique, services inutiles exposés, permissions trop larges.</p>
+          <div class="example"><span style="color:var(--red);">Error: MySQL server at 192.168.1.1:3306 — Version 5.7.2</span><br><span style="color:var(--dim);">← Révèle l'IP interne ET la version de la DB !</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="owasp-item" onclick="toggleOwasp(this)">
+      <div class="owasp-num">A06</div>
+      <div style="flex:1;">
+        <div class="owasp-name">Vulnerable Components</div>
+        <div class="owasp-short">Bibliothèques et frameworks avec vulnérabilités connues</div>
+        <div class="owasp-detail">
+          <p>Utiliser des dépendances obsolètes avec des CVE connues. Log4Shell (CVE-2021-44228, score 10.0) a affecté des millions d'applications car Log4j était utilisé partout.</p>
+        </div>
+      </div>
+    </div>
+    <div class="owasp-item" onclick="toggleOwasp(this)">
+      <div class="owasp-num">A07</div>
+      <div style="flex:1;">
+        <div class="owasp-name">Auth & Identification Failures</div>
+        <div class="owasp-short">Authentification défaillante</div>
+        <div class="owasp-detail">
+          <p>Pas de MFA, mots de passe faibles acceptés, sessions non expirées, tokens JWT mal validés, absence de protection contre la force brute.</p>
+        </div>
+      </div>
+    </div>
+    <div class="owasp-item" onclick="toggleOwasp(this)">
+      <div class="owasp-num">A08</div>
+      <div style="flex:1;">
+        <div class="owasp-name">Software & Data Integrity Failures</div>
+        <div class="owasp-short">Mises à jour et pipelines CI/CD non sécurisés</div>
+        <div class="owasp-detail">
+          <p>Un attaquant compromet le pipeline de déploiement (supply chain attack) et injecte du code malveillant dans une mise à jour légitime. Ex: SolarWinds 2020.</p>
+        </div>
+      </div>
+    </div>
+    <div class="owasp-item" onclick="toggleOwasp(this)">
+      <div class="owasp-num">A09</div>
+      <div style="flex:1;">
+        <div class="owasp-name">Security Logging Failures</div>
+        <div class="owasp-short">Absence de logs et monitoring</div>
+        <div class="owasp-detail">
+          <p>Sans logs : impossible de détecter une intrusion, de comprendre ce qui s'est passé, ou de répondre à l'incident. Les logs doivent être horodatés (NTP !) et protégés.</p>
+        </div>
+      </div>
+    </div>
+    <div class="owasp-item" onclick="toggleOwasp(this)">
+      <div class="owasp-num">A10</div>
+      <div style="flex:1;">
+        <div class="owasp-name">Server-Side Request Forgery (SSRF)</div>
+        <div class="owasp-short">Forcer le serveur à faire des requêtes internes</div>
+        <div class="owasp-detail">
+          <p>L'attaquant force le serveur à faire une requête vers une ressource interne inaccessible depuis l'extérieur. Ex: accès aux métadonnées AWS (169.254.169.254).</p>
+          <div class="example"><span style="color:var(--red);">POST /fetch?url=http://169.254.169.254/latest/meta-data/</span><br><span style="color:var(--dim);">→ Retourne les credentials AWS du serveur !</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SQL INJECTION DEMO -->
+<section>
+  <div class="section-tag">Démo interactive</div>
+  <h2>SQL Injection — <span>Simulation</span></h2>
+  <p style="color:var(--dim);font-size:0.9rem;line-height:1.65;max-width:700px;margin-bottom:20px;">Simule une attaque SQLi. Entre un username normal, puis essaie <code style="background:rgba(255,255,255,0.1);padding:2px 8px;border-radius:3px;font-family:var(--font-mono);">' OR '1'='1</code> ou <code style="background:rgba(255,255,255,0.1);padding:2px 8px;border-radius:3px;font-family:var(--font-mono);">admin'--</code></p>
+
+  <div style="max-width:600px;" class="reveal">
+    <div style="font-family:var(--font-mono);font-size:0.65rem;color:var(--dim);letter-spacing:2px;margin-bottom:6px;">FORMULAIRE DE LOGIN (VULNÉRABLE)</div>
+    <input id="sqliInput" type="text" placeholder="Entrez votre username..." oninput="simulateSQLi(this.value)" value="alice">
+    <div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--purple);letter-spacing:2px;margin-bottom:8px;">REQUÊTE SQL GÉNÉRÉE :</div>
+    <div id="sqliResult"></div>
+    <div id="sqliVerdict" style="margin-top:10px;font-family:var(--font-mono);font-size:0.85rem;padding:10px 14px;border-radius:4px;"></div>
+  </div>
+</section>
+
+<!-- DDOS SIMULATION -->
+<section style="background:var(--bg2);">
+  <div class="section-tag">Attaque réseau</div>
+  <h2>DDoS — <span>Visualisation</span></h2>
+  <p style="color:var(--dim);font-size:0.9rem;line-height:1.65;max-width:700px;margin-bottom:20px;">Un DDoS utilise un <strong style="color:#fff;">botnet</strong> (réseau de machines zombies compromises) pour saturer la cible. Clique sur les zombies pour simuler.</p>
+
+  <div class="reveal">
+    <div class="ddos-viz">
+      <div>
+        <div style="font-family:var(--font-mono);font-size:0.65rem;color:var(--red);letter-spacing:2px;margin-bottom:10px;">BOTNET (ZOMBIES)</div>
+        <div class="zombie-grid" id="zombieGrid"></div>
+        <div style="margin-top:10px;display:flex;gap:8px;">
+          <button onclick="activateAll()" class="btn-sm" style="color:var(--red);border-color:var(--red);">⚡ Activer tous</button>
+          <button onclick="deactivateAll()" class="btn-sm">✖ Stopper</button>
+        </div>
+      </div>
+      <div style="font-size:2rem;color:var(--red);opacity:0.5;" id="ddosArrow">→</div>
+      <div id="ddosServer" class="ddos-server" style="border-color:var(--green);color:var(--green);">
+        <div style="font-size:2rem;">🖥️</div>
+        <div style="font-family:var(--font-head);font-size:1rem;font-weight:700;margin:6px 0;">SERVEUR</div>
+        <div id="ddosLoad" style="font-family:var(--font-mono);font-size:0.75rem;">Charge: 0%</div>
+      </div>
+    </div>
+    <div id="ddosMsg" style="margin-top:14px;font-size:0.85rem;color:var(--dim);font-style:italic;"></div>
+  </div>
+</section>
+
+<!-- MALWARES -->
+<section>
+  <div class="section-tag">Menaces logicielles</div>
+  <h2>Types de <span>Malwares</span></h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;" class="reveal">
+    <div class="card" style="border-left:3px solid var(--red);">
+      <div style="font-size:1.4rem;margin-bottom:8px;">🔐</div>
+      <div style="font-family:var(--font-head);color:var(--red);font-size:1rem;margin-bottom:8px;">Ransomware</div>
+      <p style="font-size:0.82rem;color:var(--dim);line-height:1.6;">Chiffre tes fichiers et demande une rançon. Attaque la <strong style="color:#fff;">disponibilité</strong>. Propagation : phishing, exploits, RDP exposé.</p>
+    </div>
+    <div class="card" style="border-left:3px solid var(--orange);">
+      <div style="font-size:1.4rem;margin-bottom:8px;">🕵️</div>
+      <div style="font-family:var(--font-head);color:var(--orange);font-size:1rem;margin-bottom:8px;">Spyware</div>
+      <p style="font-size:0.82rem;color:var(--dim);line-height:1.6;">Collecte des informations à ton insu (frappes clavier, captures écran, historique web). Attaque la <strong style="color:#fff;">confidentialité</strong>.</p>
+    </div>
+    <div class="card" style="border-left:3px solid var(--yellow);">
+      <div style="font-size:1.4rem;margin-bottom:8px;">🐴</div>
+      <div style="font-family:var(--font-head);color:var(--yellow);font-size:1rem;margin-bottom:8px;">Trojan (Cheval de Troie)</div>
+      <p style="font-size:0.82rem;color:var(--dim);line-height:1.6;">Se présente comme un logiciel légitime mais contient une porte dérobée. Contrairement à un virus, il ne se réplique pas.</p>
+    </div>
+    <div class="card" style="border-left:3px solid var(--purple);">
+      <div style="font-size:1.4rem;margin-bottom:8px;">🪱</div>
+      <div style="font-family:var(--font-head);color:var(--purple);font-size:1rem;margin-bottom:8px;">Worm (Ver)</div>
+      <p style="font-size:0.82rem;color:var(--dim);line-height:1.6;">Se réplique automatiquement d'une machine à l'autre sans action humaine. WannaCry utilisait EternalBlue pour se propager sur tout le réseau en minutes.</p>
+    </div>
+    <div class="card" style="border-left:3px solid var(--cyan);">
+      <div style="font-size:1.4rem;margin-bottom:8px;">🔗</div>
+      <div style="font-family:var(--font-head);color:var(--cyan);font-size:1rem;margin-bottom:8px;">Botnet</div>
+      <p style="font-size:0.82rem;color:var(--dim);line-height:1.6;">Réseau de machines infectées (zombies) contrôlées par un Command & Control (C2). Utilisé pour DDoS, spam, minage de crypto, vol de données.</p>
+    </div>
+    <div class="card" style="border-left:3px solid var(--blue);">
+      <div style="font-size:1.4rem;margin-bottom:8px;">🥷</div>
+      <div style="font-family:var(--font-head);color:var(--blue);font-size:1rem;margin-bottom:8px;">Rootkit</div>
+      <p style="font-size:0.82rem;color:var(--dim);line-height:1.6;">Se cache dans le système en modifiant l'OS pour devenir invisible. Très difficile à détecter et supprimer. Nécessite souvent une réinstallation complète.</p>
+    </div>
+  </div>
+</section>
+
+<!-- QCM MOBILE WEB -->
+<section style="background:var(--bg2);">
+  <div class="section-tag">Entraînement — Module 05</div>
+  <h2>QCM <span>Mobile & Web</span></h2>
+  <div style="max-width:700px;">
+    <div id="mqArea"></div>
+    <div style="display:flex;justify-content:space-between;margin-top:20px;align-items:center;">
+      <button onclick="prevMQ()" class="btn-sm">← Préc.</button>
+      <span id="mqNum" style="font-family:var(--font-mono);font-size:0.8rem;color:var(--dim);"></span>
+      <button onclick="nextMQ()" class="btn-sm">Suiv. →</button>
+    </div>
+  </div>
+</section>
+
+</div>
+<script>
+function toggleOwasp(el){el.classList.toggle('expanded');}
+
+// SQLi simulation
+function simulateSQLi(v){
+  const query=`SELECT * FROM users WHERE username='${v}' AND password='...'`;
+  const isInjection=v.includes("'") || v.includes('--') || v.toLowerCase().includes('or') || v.toLowerCase().includes('union');
+  const el=document.getElementById('sqliResult');
+  const verdict=document.getElementById('sqliVerdict');
+  el.innerHTML=`<span style="color:${isInjection?'var(--red)':'var(--green)'};">${query.replace(v,`<span style="background:rgba(255,56,96,0.2);color:var(--red);">${v}</span>`)}</span>`;
+  if(isInjection){
+    verdict.style.background='rgba(255,56,96,0.1)';
+    verdict.style.border='1px solid rgba(255,56,96,0.3)';
+    verdict.style.color='var(--red)';
+    verdict.textContent='⚠️ INJECTION DÉTECTÉE ! La requête est manipulée. En production vulnérable → accès non autorisé.';
+  } else {
+    verdict.style.background='rgba(0,255,136,0.07)';
+    verdict.style.border='1px solid rgba(0,255,136,0.2)';
+    verdict.style.color='var(--green)';
+    verdict.textContent='✅ Requête normale — pas d\'injection détectée.';
+  }
+}
+simulateSQLi('alice');
+
+// DDoS simulation
+const zombieGrid=document.getElementById('zombieGrid');
+let activeZombies=0;
+for(let i=0;i<15;i++){
+  const z=document.createElement('div');
+  z.className='zombie';
+  z.textContent='💻';
+  z.onclick=()=>{
+    z.classList.toggle('active');
+    updateDDoS();
+  };
+  zombieGrid.appendChild(z);
+}
+
+function updateDDoS(){
+  activeZombies=document.querySelectorAll('.zombie.active').length;
+  const pct=Math.round(activeZombies/15*100);
+  const server=document.getElementById('ddosServer');
+  const load=document.getElementById('ddosLoad');
+  const msg=document.getElementById('ddosMsg');
+  load.textContent=`Charge: ${pct}%`;
+  if(pct===0){server.style.borderColor='var(--green)';server.style.color='var(--green)';msg.textContent='Serveur normal. Aucune attaque.';}
+  else if(pct<40){server.style.borderColor='var(--yellow)';server.style.color='var(--yellow)';msg.textContent='⚠️ Trafic élevé détecté. Le serveur gère encore...';}
+  else if(pct<70){server.style.borderColor='var(--orange)';server.style.color='var(--orange)';msg.textContent='🔴 Saturation ! Le serveur commence à ralentir. Les utilisateurs légitimes subissent des timeouts.';}
+  else{server.style.borderColor='var(--red)';server.style.color='var(--red)';msg.textContent='💥 SERVEUR DOWN ! Attaque DDoS réussie — déni de service total. Disponibilité = 0. C\'est une attaque sur la composante A de CIA.';}
+}
+
+function activateAll(){document.querySelectorAll('.zombie').forEach(z=>z.classList.add('active'));updateDDoS();}
+function deactivateAll(){document.querySelectorAll('.zombie').forEach(z=>z.classList.remove('active'));updateDDoS();}
+
+// QCM
+const mqData=[
+  {q:"Qu'est-ce que la sandbox Android ?",opts:["Un jeu pour enfants","Isolation de chaque application dans son propre espace protégé","Un type de malware","Un mode de test Android"],correct:1,expl:"La <strong>sandbox Android</strong> isole chaque application : elle ne peut pas lire les données des autres apps, accéder aux ressources système sans permission, ou communiquer directement avec d'autres apps. Chaque app a son propre <strong>UID Linux</strong>."},
+  {q:"Quelle est la vulnérabilité OWASP #1 depuis 2021 ?",opts:["SQL Injection","Broken Access Control","XSS","Cryptographic Failures"],correct:1,expl:"<strong>A01 - Broken Access Control</strong> est la vulnérabilité #1. Elle se produit quand un utilisateur peut accéder à des données ou des actions non autorisées. Ex: modifier l'URL /user/123 en /user/124 pour accéder au profil d'un autre."},
+  {q:"Qu'est-ce qu'une injection SQL classique ' OR '1'='1 ?",opts:["Une commande de formatage","Une manipulation de la requête SQL pour contourner l'authentification","Un mot de passe valide","Une erreur de syntaxe SQL"],correct:1,expl:"<strong>' OR '1'='1</strong> ferme la chaîne SQL, puis ajoute une condition toujours vraie. La requête devient : WHERE user='' OR '1'='1' AND password=... → retourne tous les utilisateurs. Fix : <strong>requêtes paramétrées</strong>."},
+  {q:"Quelle est la différence entre un virus et un worm (ver) ?",opts:["Ce sont des synonymes","Un virus nécessite une action humaine pour se propager, un worm se propage automatiquement","Un worm est plus dangereux","Un virus est un logiciel légitime"],correct:1,expl:"<strong>Virus</strong> : s'attache à un fichier et se propage quand l'utilisateur l'ouvre/l'exécute. <strong>Worm</strong> : se réplique automatiquement via les réseaux sans action humaine. WannaCry était un worm qui se propageait via la faille EternalBlue en quelques secondes."},
+  {q:"Qu'est-ce qu'un CVE identifiant comme CVE-2021-44228 ?",opts:["Un code de classification pénal","Common Vulnerability Exposure — identifiant unique d'une vulnérabilité connue","Un numéro de certificat TLS","Un code d'erreur HTTP"],correct:1,expl:"<strong>CVE-2021-44228</strong> = Log4Shell. Format : CVE-ANNÉE-NUMÉRO. C'est Log4j (bibliothèque Java utilisée partout) — score CVSS 10.0, permettait l'exécution de code à distance sans authentification. Une des vulnérabilités les plus critiques de l'histoire."},
+];
+let mqIdx=0,mqA=[];
+function renderMQ(){
+  const q=mqData[mqIdx];
+  document.getElementById('mqNum').textContent=`${mqIdx+1} / ${mqData.length}`;
+  document.getElementById('mqArea').innerHTML=`<div class="card"><div style="font-family:var(--font-mono);font-size:0.65rem;color:var(--purple);letter-spacing:3px;margin-bottom:12px;">QUESTION ${mqIdx+1}</div><div style="font-size:1rem;font-weight:600;color:#fff;margin-bottom:20px;line-height:1.5;">${q.q}</div>${q.opts.map((o,i)=>`<div onclick="answerMQ(${i})" style="background:rgba(0,0,0,0.3);border:1px solid ${mqA[mqIdx]!==undefined?(i===q.correct?'var(--green)':mqA[mqIdx]===i?'var(--red)':'rgba(255,255,255,0.08)'):'rgba(255,255,255,0.08)'};border-radius:4px;padding:12px 16px;margin-bottom:10px;cursor:${mqA[mqIdx]!==undefined?'default':'pointer'};font-size:0.88rem;color:${mqA[mqIdx]!==undefined?(i===q.correct?'var(--green)':mqA[mqIdx]===i?'var(--red)':'var(--dim)'):'var(--text)'};display:flex;align-items:center;gap:10px;"><span style="width:24px;height:24px;border-radius:50%;border:1px solid currentColor;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:0.7rem;flex-shrink:0;">${['A','B','C','D'][i]}</span>${o}</div>`).join('')}${mqA[mqIdx]!==undefined?`<div style="padding:14px;background:rgba(0,0,0,0.4);border-left:3px solid var(--green);font-size:0.85rem;color:var(--text);line-height:1.65;margin-top:8px;">${mqA[mqIdx]===q.correct?'✅ Correct ! ':'❌ Incorrect. '}${q.expl}</div>`:''}</div>`;
+}
+function answerMQ(i){if(mqA[mqIdx]!==undefined)return;mqA[mqIdx]=i;renderMQ();}
+function nextMQ(){if(mqIdx<mqData.length-1){mqIdx++;renderMQ();}}
+function prevMQ(){if(mqIdx>0){mqIdx--;renderMQ();}}
+renderMQ();
+
+const obs=new IntersectionObserver(e=>e.forEach(x=>x.isIntersecting&&x.target.classList.add('visible')),{threshold:0.1});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>

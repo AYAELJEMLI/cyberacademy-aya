@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cryptographie — CyberAcademy</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700;800&display=swap');
+:root {
+  --bg:#020408;--bg2:#060d14;--panel:rgba(0,255,136,0.04);--border:rgba(0,255,136,0.15);
+  --green:#00ff88;--cyan:#00e5ff;--red:#ff3860;--orange:#ff9f43;--yellow:#ffd32a;
+  --purple:#a29bfe;--blue:#74b9ff;--text:#c8d6e5;--dim:rgba(200,214,229,0.5);
+  --font-main:'Exo 2',sans-serif;--font-mono:'Share Tech Mono',monospace;--font-head:'Rajdhani',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--font-main);overflow-x:hidden;}
+body::after{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);pointer-events:none;z-index:1;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(2,4,8,0.9);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);padding:0 40px;height:60px;display:flex;align-items:center;justify-content:space-between;}
+.nav-logo{font-family:var(--font-head);font-size:1.4rem;font-weight:700;color:var(--green);letter-spacing:3px;text-decoration:none;}
+.nav-logo span{color:var(--text);}
+.nav-back{font-family:var(--font-mono);font-size:0.75rem;color:var(--dim);text-decoration:none;border:1px solid var(--border);padding:6px 16px;border-radius:3px;transition:all 0.2s;}
+.nav-back:hover{color:var(--green);border-color:var(--green);}
+.wrapper{position:relative;z-index:2;padding-top:60px;}
+section{padding:80px 80px;}
+.section-tag{font-family:var(--font-mono);font-size:0.65rem;color:var(--green);letter-spacing:4px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:10px;}
+.section-tag::before{content:'//';color:var(--dim);}
+h1,h2{font-family:var(--font-head);font-weight:700;letter-spacing:1px;color:#fff;line-height:1.1;}
+h1{font-size:clamp(2.5rem,5vw,4.5rem);margin-bottom:16px;}
+h2{font-size:2rem;margin-bottom:20px;}
+h2 span{color:var(--green);}
+.lead{color:var(--dim);font-size:1rem;line-height:1.7;max-width:650px;margin-bottom:50px;}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:28px;margin-bottom:20px;}
+.code-block{background:#000;border:1px solid rgba(255,255,255,0.07);border-radius:6px;padding:20px 24px;font-family:var(--font-mono);font-size:0.82rem;line-height:1.9;overflow-x:auto;margin:16px 0;}
+.kw{color:#a29bfe;}.val{color:#81c784;}.cmt{color:#455a64;font-style:italic;}.hi{color:#00ff88;font-weight:700;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.info-box{background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:6px;padding:20px 24px;margin-top:14px;}
+.info-box h4{font-family:var(--font-mono);font-size:0.65rem;color:var(--green);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px;}
+.tag{display:inline-block;font-family:var(--font-mono);font-size:0.65rem;border:1px solid currentColor;padding:2px 8px;border-radius:2px;margin:3px;}
+
+/* Interactive caesar */
+#caesarInput,#caesarKey{background:rgba(0,0,0,0.5);border:1px solid var(--border);border-radius:4px;padding:12px 16px;color:var(--text);font-family:var(--font-mono);font-size:0.9rem;width:100%;outline:none;margin-bottom:12px;}
+#caesarInput:focus,#caesarKey:focus{border-color:var(--green);}
+#caesarOutput{background:rgba(0,255,136,0.05);border:1px solid rgba(0,255,136,0.2);border-radius:4px;padding:16px;font-family:var(--font-mono);font-size:1rem;color:var(--green);min-height:48px;letter-spacing:2px;word-break:break-all;}
+
+/* XOR Demo */
+.xor-row{display:flex;gap:4px;align-items:center;font-family:var(--font-mono);font-size:0.85rem;margin:6px 0;}
+.bit{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:3px;border:1px solid rgba(255,255,255,0.15);}
+.bit-1{background:rgba(0,255,136,0.15);color:var(--green);}
+.bit-0{background:rgba(255,255,255,0.05);color:var(--dim);}
+
+/* Hash demo */
+#hashInput{background:rgba(0,0,0,0.5);border:1px solid var(--border);border-radius:4px;padding:12px 16px;color:var(--text);font-family:var(--font-mono);font-size:0.9rem;width:100%;outline:none;margin-bottom:12px;}
+#hashInput:focus{border-color:var(--cyan);}
+#hashMd5,#hashSha{background:rgba(0,0,0,0.4);border-radius:4px;padding:14px;font-family:var(--font-mono);font-size:0.78rem;word-break:break-all;margin-top:8px;}
+#hashMd5{color:var(--red);border:1px solid rgba(255,56,96,0.3);}
+#hashSha{color:var(--cyan);border:1px solid rgba(0,229,255,0.3);}
+
+/* Sym vs Asym diagram */
+.key-diagram{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;padding:20px 0;}
+.kd-box{background:rgba(0,0,0,0.4);border:1px solid;border-radius:8px;padding:16px 20px;text-align:center;min-width:110px;}
+.kd-arr{font-size:1.5rem;opacity:0.5;}
+.kd-label{font-family:var(--font-mono);font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;display:block;}
+.kd-icon{font-size:1.8rem;}
+
+@media(max-width:900px){section{padding:60px 24px;}.two-col{grid-template-columns:1fr;}}
+
+.reveal{opacity:0;transform:translateY(20px);transition:opacity 0.5s,transform 0.5s;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+.btn{background:var(--green);color:#000;font-family:var(--font-head);font-weight:700;font-size:0.85rem;letter-spacing:2px;padding:10px 24px;border:none;border-radius:3px;cursor:pointer;margin-top:10px;transition:all 0.2s;}
+.btn:hover{box-shadow:0 0 20px rgba(0,255,136,0.4);}
+.btn-sm{background:transparent;color:var(--green);border:1px solid var(--green);font-family:var(--font-mono);font-size:0.75rem;padding:7px 16px;border-radius:3px;cursor:pointer;transition:all 0.2s;}
+.btn-sm:hover{background:var(--panel);}
+.range{-webkit-appearance:none;appearance:none;width:100%;height:4px;background:var(--border);border-radius:2px;outline:none;margin:8px 0;}
+.range::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:16px;height:16px;border-radius:50%;background:var(--green);cursor:pointer;}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">Cyber<span>Academy</span></a>
+  <a href="index.html" class="nav-back">← Retour accueil</a>
+</nav>
+<div class="wrapper">
+
+<!-- HERO -->
+<section style="background:var(--bg2); min-height:50vh; display:flex; flex-direction:column; justify-content:center;">
+  <div class="section-tag">Module 01</div>
+  <h1>Crypto<span style="color:var(--green);">graphie</span></h1>
+  <p class="lead">De César à AES-256 — comprendre comment on protège l'information depuis l'antiquité jusqu'aux algorithmes modernes. Avec des démos interactives.</p>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <span class="tag" style="color:var(--green);">Chiffrement symétrique</span>
+    <span class="tag" style="color:var(--green);">Chiffrement asymétrique</span>
+    <span class="tag" style="color:var(--green);">Hachage</span>
+    <span class="tag" style="color:var(--green);">XOR</span>
+    <span class="tag" style="color:var(--green);">Stéganographie</span>
+    <span class="tag" style="color:var(--green);">Cryptanalyse</span>
+  </div>
+</section>
+
+<!-- DÉFINITIONS DE BASE -->
+<section>
+  <div class="section-tag">Bases</div>
+  <h2>C'est quoi la <span>Cryptographie</span> ?</h2>
+  <p style="color:var(--dim);font-size:0.95rem;line-height:1.7;max-width:700px;margin-bottom:40px;">La cryptographie, c'est la science de la communication secrète. Elle permet de transformer un message lisible en un message incompréhensible pour toute personne non autorisée. Elle existe depuis 4000 ans !</p>
+
+  <div class="two-col reveal">
+    <div class="card" style="border-left:3px solid var(--green);">
+      <div style="font-family:var(--font-head);font-size:1.2rem;color:var(--green);margin-bottom:10px;">🔐 Cryptographie</div>
+      <p style="font-size:0.88rem;color:var(--dim);line-height:1.65;">Transformation d'un message en utilisant une <strong style="color:#fff;">clé</strong>. Si tu as la clé → tu peux lire. Sans la clé → impossible. C'est réversible avec la bonne clé.</p>
+      <div class="code-block" style="margin-top:12px;">
+        <span class="hi">Texte clair</span> + <span class="kw">Clé</span> = <span class="val">Texte chiffré</span><br>
+        <span class="cmt">ex: "BONJOUR" + clé 3 = "ERQMRXU"</span>
+      </div>
+    </div>
+    <div class="card" style="border-left:3px solid var(--purple);">
+      <div style="font-family:var(--font-head);font-size:1.2rem;color:var(--purple);margin-bottom:10px;">🖼️ Stéganographie</div>
+      <p style="font-size:0.88rem;color:var(--dim);line-height:1.65;">Cacher l'existence même du message — pas le chiffrer. Exemple : cacher du texte dans les pixels d'une image. Personne ne sait qu'il y a un message caché.</p>
+      <div class="code-block" style="margin-top:12px;">
+        <span class="cmt">Cryptographie : "Je sais qu'il y a</span><br>
+        <span class="cmt"> un message, mais je ne peux pas le lire"</span><br>
+        <span class="cmt">Stéganographie : "Je ne sais même pas</span><br>
+        <span class="cmt"> qu'il y a un message ici !"</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="two-col reveal" style="margin-top:20px;">
+    <div class="card">
+      <div style="font-family:var(--font-head);font-size:1rem;color:#fff;margin-bottom:8px;">📝 Plain Text (Texte en clair)</div>
+      <p style="font-size:0.85rem;color:var(--dim);line-height:1.6;">Le message original, lisible par n'importe qui. Aussi appelé "cleartext" ou "plaintext". C'est ce qu'on veut protéger.</p>
+    </div>
+    <div class="card">
+      <div style="font-family:var(--font-head);font-size:1rem;color:#fff;margin-bottom:8px;">🔒 Cipher Text (Texte chiffré)</div>
+      <p style="font-size:0.85rem;color:var(--dim);line-height:1.6;">Le message après chiffrement. Incompréhensible sans la clé de déchiffrement. Même en l'interceptant, on ne peut rien faire.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CHIFFREMENT CESAR INTERACTIF -->
+<section style="background:var(--bg2);">
+  <div class="section-tag">Crypto classique — Antiquité</div>
+  <h2>Le Chiffre de <span>César</span> — Démo interactive</h2>
+  <p style="color:var(--dim);font-size:0.9rem;line-height:1.65;max-width:600px;margin-bottom:30px;">Jules César décalait chaque lettre de 3 positions dans l'alphabet pour ses messages militaires. C'est la plus simple des substitutions monoalphabétiques. Essaie ci-dessous !</p>
+
+  <div style="max-width:600px;" class="reveal">
+    <label style="font-family:var(--font-mono);font-size:0.7rem;color:var(--dim);letter-spacing:2px;display:block;margin-bottom:6px;">TEXTE À CHIFFRER</label>
+    <input id="caesarInput" type="text" placeholder="Tape ton message ici..." oninput="updateCaesar()" value="BONJOUR">
+
+    <label style="font-family:var(--font-mono);font-size:0.7rem;color:var(--dim);letter-spacing:2px;display:block;margin-bottom:6px;">CLÉ (décalage : <span id="keyVal">3</span>)</label>
+    <input id="caesarSlider" type="range" min="1" max="25" value="3" class="range" oninput="document.getElementById('keyVal').textContent=this.value;document.getElementById('caesarKey').value=this.value;updateCaesar()">
+    <input id="caesarKey" type="number" min="1" max="25" value="3" placeholder="Clé (1-25)" oninput="document.getElementById('caesarSlider').value=this.value;document.getElementById('keyVal').textContent=this.value;updateCaesar()">
+
+    <label style="font-family:var(--font-mono);font-size:0.7rem;color:var(--green);letter-spacing:2px;display:block;margin-bottom:8px;margin-top:6px;">TEXTE CHIFFRÉ</label>
+    <div id="caesarOutput">ERQMRXU</div>
+
+    <div class="info-box" style="margin-top:16px;">
+      <h4>📊 Analyse de fréquence</h4>
+      <div id="freqAnalysis" style="font-family:var(--font-mono);font-size:0.73rem;color:var(--dim);line-height:1.8;"></div>
+    </div>
+    <p style="font-size:0.8rem;color:var(--dim);margin-top:12px;line-height:1.6;">💡 <strong style="color:#fff;">Faiblesse</strong> : César peut être cassé par <strong style="color:var(--orange);">analyse de fréquence</strong> — en français, E est la lettre la plus fréquente (17%). Si dans le texte chiffré la lettre H est la plus fréquente, la clé est probablement 3 (H = E+3).</p>
+  </div>
+
+  <!-- TABLE ALPHABÉTIQUE -->
+  <div style="margin-top:40px;" class="reveal">
+    <h3 style="font-family:var(--font-head);font-size:1.5rem;color:#fff;margin-bottom:16px;">Comment ça marche — Visualisation</h3>
+    <div style="overflow-x:auto;">
+      <table style="border-collapse:collapse;font-family:var(--font-mono);font-size:0.75rem;white-space:nowrap;">
+        <tr id="alphaTop"></tr>
+        <tr id="alphaBot"></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- SUBSTITUTION & TRANSPOSITION -->
+<section>
+  <div class="section-tag">Crypto classique</div>
+  <h2>Substitution vs <span>Transposition</span></h2>
+
+  <div class="two-col reveal">
+    <div class="card" style="border-left:3px solid var(--orange);">
+      <div style="font-family:var(--font-head);font-size:1.1rem;color:var(--orange);margin-bottom:10px;">🔄 Substitution</div>
+      <p style="font-size:0.85rem;color:var(--dim);line-height:1.65;margin-bottom:12px;">Chaque lettre est <strong style="color:#fff;">remplacée</strong> par une autre lettre ou symbole. L'ordre reste le même, mais les lettres changent.</p>
+      <div class="code-block">
+        <span class="cmt">César (décalage 3) :</span><br>
+        <span class="hi">A</span> → <span class="val">D</span>, <span class="hi">B</span> → <span class="val">E</span>, <span class="hi">C</span> → <span class="val">F</span>...<br><br>
+        <span class="cmt">ROT13 (décalage 13) :</span><br>
+        <span class="hi">BONJOUR</span> → <span class="val">OBAWHBE</span><br><br>
+        <span class="cmt">Vigenère (clé = "KEY") :</span><br>
+        <span class="hi">HELLO</span> + <span class="kw">KEYKE</span> → <span class="val">RIJVS</span>
+      </div>
+    </div>
+    <div class="card" style="border-left:3px solid var(--blue);">
+      <div style="font-family:var(--font-head);font-size:1.1rem;color:var(--blue);margin-bottom:10px;">🔀 Transposition</div>
+      <p style="font-size:0.85rem;color:var(--dim);line-height:1.65;margin-bottom:12px;">Les lettres restent les <strong style="color:#fff;">mêmes</strong> mais leur ordre est mélangé selon une clé.</p>
+      <div class="code-block">
+        <span class="cmt">Transposition en colonnes :</span><br>
+        <span class="hi">ATTAQUEZDEMAIN</span><br>
+        <span class="cmt">Clé : 3 4 1 2</span><br>
+        Rangée 1 : <span class="val">A T T A</span><br>
+        Rangée 2 : <span class="val">Q U E Z</span><br>
+        Rangée 3 : <span class="val">D E M A</span><br>
+        Rangée 4 : <span class="val">I N . .</span><br>
+        <span class="cmt">→ Colonnes dans ordre clé 1,2,3,4...</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- XOR -->
+<section style="background:var(--bg2);">
+  <div class="section-tag">Crypto moderne — Fondation</div>
+  <h2>L'opérateur <span>XOR</span> — La magie du chiffrement</h2>
+  <p style="color:var(--dim);font-size:0.9rem;line-height:1.65;max-width:700px;margin-bottom:30px;">XOR (Exclusive OR) est l'opération binaire au cœur de presque tous les algorithmes de chiffrement modernes (AES, RC4, OTP). Sa propriété magique : A XOR B XOR B = A — donc chiffrer puis rechiffrer avec la même clé donne le texte original !</p>
+
+  <div class="two-col reveal">
+    <div>
+      <div class="info-box">
+        <h4>Table de vérité XOR</h4>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;font-family:var(--font-mono);font-size:0.85rem;text-align:center;">
+          <div style="color:var(--dim);">A</div><div style="color:var(--dim);">B</div><div style="color:var(--green);">A⊕B</div>
+          <div>0</div><div>0</div><div style="color:var(--green);">0</div>
+          <div>0</div><div>1</div><div style="color:var(--green);">1</div>
+          <div>1</div><div>0</div><div style="color:var(--green);">1</div>
+          <div>1</div><div>1</div><div style="color:var(--green);">0</div>
+        </div>
+        <p style="font-size:0.78rem;color:var(--dim);margin-top:14px;line-height:1.6;">0 si les deux bits sont identiques, 1 s'ils sont différents.</p>
+      </div>
+
+      <div class="code-block" style="margin-top:14px;">
+        <span class="cmt">Exemple XOR chiffrement :</span><br>
+        Clair   : <span class="hi">01001000</span>  (= 'H')<br>
+        Clé     : <span class="kw">10101010</span><br>
+        <span style="color:var(--dim);">────────────────</span><br>
+        Chiffré : <span class="val">11100010</span>  XOR<br><br>
+        <span class="cmt">Pour déchiffrer — XOR avec la même clé !</span><br>
+        Chiffré : <span class="val">11100010</span><br>
+        Clé     : <span class="kw">10101010</span><br>
+        <span style="color:var(--dim);">────────────────</span><br>
+        Clair   : <span class="hi">01001000</span>  = 'H' ✓
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div style="font-family:var(--font-head);font-size:1rem;color:#fff;margin-bottom:12px;">🔑 One-Time Pad (OTP) — Indéchiffrable</div>
+        <p style="font-size:0.85rem;color:var(--dim);line-height:1.65;margin-bottom:10px;">Si la clé XOR est :</p>
+        <ul style="font-size:0.83rem;color:var(--dim);line-height:1.8;list-style:none;padding-left:0;">
+          <li>✅ <strong style="color:#fff;">Aussi longue</strong> que le message</li>
+          <li>✅ <strong style="color:#fff;">Vraiment aléatoire</strong></li>
+          <li>✅ <strong style="color:#fff;">Utilisée une seule fois</strong></li>
+        </ul>
+        <p style="font-size:0.83rem;color:var(--green);margin-top:10px;">→ Indéchiffrable mathématiquement prouvé !</p>
+        <p style="font-size:0.78rem;color:var(--dim);margin-top:6px;">Problème : distribuer une clé aussi longue que le message de façon sécurisée est impossible à grande échelle.</p>
+      </div>
+      <div class="card" style="margin-top:14px;">
+        <div style="font-family:var(--font-head);font-size:1rem;color:var(--cyan);margin-bottom:10px;">🔄 Mode CTR (Counter)</div>
+        <p style="font-size:0.83rem;color:var(--dim);line-height:1.65;">AES-CTR : un compteur est chiffré, puis XORé avec le texte clair. Permet de chiffrer des données en streaming. C1 = XOR(P1, AES(clé, compteur1)).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CHIFFREMENT SYMÉTRIQUE VS ASYMÉTRIQUE -->
+<section>
+  <div class="section-tag">Crypto moderne</div>
+  <h2>Symétrique vs <span>Asymétrique</span></h2>
+
+  <div class="two-col reveal">
+    <div class="card" style="border-left:3px solid var(--green);">
+      <div style="font-family:var(--font-head);font-size:1.2rem;color:var(--green);margin-bottom:12px;">🔑 Symétrique — 1 clé</div>
+      <p style="font-size:0.85rem;color:var(--dim);line-height:1.65;margin-bottom:14px;">La même clé sert à chiffrer ET déchiffrer. Rapide, efficace pour les grandes données. <strong style="color:var(--red);">Problème : comment partager la clé de façon sécurisée ?</strong></p>
+      <div class="key-diagram">
+        <div class="kd-box" style="border-color:var(--blue);"><span class="kd-label" style="color:var(--blue);">Alice</span><span class="kd-icon">👩</span></div>
+        <div class="kd-arr">🔑→</div>
+        <div class="kd-box" style="border-color:var(--green);"><span class="kd-label" style="color:var(--green);">Clé K</span><span class="kd-icon">🔐</span></div>
+        <div class="kd-arr">→🔑</div>
+        <div class="kd-box" style="border-color:var(--orange);"><span class="kd-label" style="color:var(--orange);">Bob</span><span class="kd-icon">👨</span></div>
+      </div>
+      <div style="margin-top:10px;">
+        <div class="tag" style="color:var(--green);">AES-128/256</div>
+        <div class="tag" style="color:var(--green);">DES (obsolète)</div>
+        <div class="tag" style="color:var(--green);">3DES</div>
+        <div class="tag" style="color:var(--green);">ChaCha20</div>
+      </div>
+      <div class="info-box" style="margin-top:14px;">
+        <h4>Modes de fonctionnement</h4>
+        <div style="font-size:0.82rem;color:var(--dim);line-height:1.7;">
+          <strong style="color:#fff;">Par blocs (block cipher)</strong> : AES — divise le message en blocs de 128 bits, chiffre bloc par bloc.<br>
+          <strong style="color:#fff;">Par flux (stream cipher)</strong> : RC4, ChaCha20 — chiffre bit par bit / octet par octet. Plus rapide pour les flux continus.
+        </div>
+      </div>
+    </div>
+    <div class="card" style="border-left:3px solid var(--purple);">
+      <div style="font-family:var(--font-head);font-size:1.2rem;color:var(--purple);margin-bottom:12px;">🔐 Asymétrique — 2 clés</div>
+      <p style="font-size:0.85rem;color:var(--dim);line-height:1.65;margin-bottom:14px;">Une paire de clés : clé publique (partagée librement) et clé privée (secrète). Résout le problème de l'échange de clés ! Plus lent que le symétrique.</p>
+      <div class="key-diagram">
+        <div class="kd-box" style="border-color:var(--blue);"><span class="kd-label" style="color:var(--blue);">Alice</span><span class="kd-icon">👩</span></div>
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:center;">
+          <span style="font-size:0.7rem;color:var(--green);">🔑pub→</span>
+          <span style="font-size:0.7rem;color:var(--red);">←🔒priv</span>
+        </div>
+        <div class="kd-box" style="border-color:var(--orange);"><span class="kd-label" style="color:var(--orange);">Bob</span><span class="kd-icon">👨</span></div>
+      </div>
+      <p style="font-size:0.78rem;color:var(--dim);margin-top:10px;line-height:1.5;">Pour chiffrer vers Alice : utilise sa <strong style="color:var(--green);">clé publique</strong>. Seule Alice peut déchiffrer avec sa <strong style="color:var(--red);">clé privée</strong>.</p>
+      <div style="margin-top:10px;">
+        <div class="tag" style="color:var(--purple);">RSA-2048/4096</div>
+        <div class="tag" style="color:var(--purple);">ECC</div>
+        <div class="tag" style="color:var(--purple);">Diffie-Hellman</div>
+        <div class="tag" style="color:var(--purple);">ElGamal</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card reveal" style="margin-top:20px;border-left:3px solid var(--cyan);">
+    <div style="font-family:var(--font-head);font-size:1.1rem;color:var(--cyan);margin-bottom:12px;">💡 En pratique : chiffrement hybride (HTTPS/TLS)</div>
+    <p style="font-size:0.88rem;color:var(--dim);line-height:1.7;">Dans HTTPS, on utilise les deux ! L'asymétrique pour échanger une clé de session, puis le symétrique pour chiffrer les données (AES est 1000x plus rapide que RSA).</p>
+    <div class="code-block">
+      <span class="cmt">1.</span> Alice génère une <span class="kw">clé symétrique aléatoire</span> (session key)<br>
+      <span class="cmt">2.</span> Elle la chiffre avec la <span class="hi">clé publique RSA du serveur</span><br>
+      <span class="cmt">3.</span> Le serveur déchiffre avec sa <span class="val">clé privée RSA</span> → obtient la session key<br>
+      <span class="cmt">4.</span> Toute la communication se fait avec <span class="kw">AES (symétrique)</span> — rapide !
+    </div>
+  </div>
+</section>
+
+<!-- HACHAGE -->
+<section style="background:var(--bg2);">
+  <div class="section-tag">Crypto — Intégrité</div>
+  <h2>Fonctions de <span>Hachage</span></h2>
+  <p style="color:var(--dim);font-size:0.9rem;line-height:1.65;max-width:700px;margin-bottom:30px;">Une fonction de hachage transforme n'importe quelle donnée en une empreinte de taille fixe. C'est à sens unique (irréversible), déterministe (même entrée → même sortie), et l'effet avalanche garantit qu'un seul bit changé → empreinte totalement différente.</p>
+
+  <div style="max-width:600px;" class="reveal">
+    <label style="font-family:var(--font-mono);font-size:0.7rem;color:var(--dim);letter-spacing:2px;display:block;margin-bottom:6px;">TEXTE À HACHER</label>
+    <input id="hashInput" type="text" placeholder="Tape quelque chose... (essaie de changer 1 seule lettre !)" value="bonjour" oninput="updateHash()">
+    <div style="font-family:var(--font-mono);font-size:0.65rem;color:var(--red);letter-spacing:2px;margin-top:8px;margin-bottom:4px;">MD5 (128 bits — CASSÉ, ne plus utiliser !)</div>
+    <div id="hashMd5"></div>
+    <div style="font-family:var(--font-mono);font-size:0.65rem;color:var(--cyan);letter-spacing:2px;margin-top:14px;margin-bottom:4px;">SHA-256 (256 bits — Recommandé)</div>
+    <div id="hashSha"></div>
+  </div>
+
+  <div class="two-col reveal" style="margin-top:30px;">
+    <div class="card">
+      <div style="font-family:var(--font-head);font-size:1rem;color:#fff;margin-bottom:10px;">⚡ Propriétés d'une bonne fonction de hachage</div>
+      <ul style="font-size:0.85rem;color:var(--dim);line-height:1.9;list-style:none;">
+        <li>✅ <strong style="color:#fff;">Déterministe</strong> — même entrée → même hash</li>
+        <li>✅ <strong style="color:#fff;">Irréversible</strong> — impossible de retrouver l'original</li>
+        <li>✅ <strong style="color:#fff;">Effet avalanche</strong> — 1 bit changé → hash totalement différent</li>
+        <li>✅ <strong style="color:#fff;">Résistance aux collisions</strong> — impossible de trouver 2 entrées avec le même hash</li>
+        <li>✅ <strong style="color:#fff;">Rapide à calculer</strong></li>
+      </ul>
+    </div>
+    <div class="card">
+      <div style="font-family:var(--font-head);font-size:1rem;color:#fff;margin-bottom:10px;">📋 Usages des fonctions de hachage</div>
+      <ul style="font-size:0.85rem;color:var(--dim);line-height:1.9;list-style:none;">
+        <li>🔐 <strong style="color:#fff;">Mots de passe</strong> — stockés en hash, jamais en clair</li>
+        <li>✅ <strong style="color:#fff;">Intégrité fichiers</strong> — vérifier qu'un fichier n'a pas été modifié</li>
+        <li>⛓️ <strong style="color:#fff;">Blockchain</strong> — chaque bloc contient le hash du précédent</li>
+        <li>🖊️ <strong style="color:#fff;">Signatures numériques</strong> — on signe le hash, pas le document entier</li>
+        <li>🔍 <strong style="color:#fff;">Détection de malwares</strong> — base de signatures antivirales</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- CRYPTANALYSE -->
+<section>
+  <div class="section-tag">Attaques sur la cryptographie</div>
+  <h2><span>Cryptanalyse</span> — Comment casser un chiffrement</h2>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;" class="reveal">
+    <div class="card" style="border-left:3px solid var(--red);">
+      <div style="font-family:var(--font-head);color:var(--red);font-size:1rem;margin-bottom:8px;">💪 Force Brute</div>
+      <p style="font-size:0.83rem;color:var(--dim);line-height:1.6;">Essayer toutes les clés possibles. Pour AES-256 : 2²⁵⁶ possibilités. L'âge de l'univers ne suffirait pas avec tous les supercalculateurs du monde.</p>
+    </div>
+    <div class="card" style="border-left:3px solid var(--orange);">
+      <div style="font-family:var(--font-head);color:var(--orange);font-size:1rem;margin-bottom:8px;">📊 Analyse de Fréquence</div>
+      <p style="font-size:0.83rem;color:var(--dim);line-height:1.6;">Exploite la distribution des lettres dans une langue. En français, E (17%), A (8%), I (7%)... Casse facilement César et Vigenère.</p>
+    </div>
+    <div class="card" style="border-left:3px solid var(--yellow);">
+      <div style="font-family:var(--font-head);color:var(--yellow);font-size:1rem;margin-bottom:8px;">📖 Dictionnaire</div>
+      <p style="font-size:0.83rem;color:var(--dim);line-height:1.6;">Tester une liste de mots communs comme clés/mots de passe. 90% des mots de passe sont dans les 10 000 premiers mots de passe les plus utilisés.</p>
+    </div>
+    <div class="card" style="border-left:3px solid var(--purple);">
+      <div style="font-family:var(--font-head);color:var(--purple);font-size:1rem;margin-bottom:8px;">🌈 Rainbow Tables</div>
+      <p style="font-size:0.83rem;color:var(--dim);line-height:1.6;">Table précalculée hash→texte. Permet de "retrouver" un mot de passe depuis son hash en quelques secondes. Contre-mesure : <strong style="color:#fff;">salage (salt)</strong>.</p>
+    </div>
+    <div class="card" style="border-left:3px solid var(--cyan);">
+      <div style="font-family:var(--font-head);color:var(--cyan);font-size:1rem;margin-bottom:8px;">🔮 Collision</div>
+      <p style="font-size:0.83rem;color:var(--dim);line-height:1.6;">Trouver deux entrées différentes avec le même hash. MD5 est cassé (collisions trouvées en 2004). SHA-1 aussi. SHA-256 est sûr.</p>
+    </div>
+    <div class="card" style="border-left:3px solid var(--green);">
+      <div style="font-family:var(--font-head);color:var(--green);font-size:1rem;margin-bottom:8px;">🔑 Padding Oracle</div>
+      <p style="font-size:0.83rem;color:var(--dim);line-height:1.6;">Attaque sur les algorithmes par blocs. Le bourrage (padding) est utilisé pour compléter le dernier bloc à la taille requise (ex: blocs de 128 bits avec AES).</p>
+    </div>
+  </div>
+</section>
+
+<!-- QCM CRYPTO -->
+<section style="background:var(--bg2);">
+  <div class="section-tag">Entraînement — Module 01</div>
+  <h2>QCM <span>Cryptographie</span></h2>
+
+  <div style="max-width:700px;" id="cryptoQcm">
+    <div id="cqArea"></div>
+    <div style="display:flex;justify-content:space-between;margin-top:20px;align-items:center;">
+      <button onclick="prevCQ()" class="btn-sm">← Préc.</button>
+      <span id="cqNum" style="font-family:var(--font-mono);font-size:0.8rem;color:var(--dim);"></span>
+      <button onclick="nextCQ()" class="btn-sm">Suiv. →</button>
+    </div>
+  </div>
+</section>
+
+</div><!-- /wrapper -->
+<script>
+// Caesar cipher
+function caesarEncode(text, shift) {
+  return text.toUpperCase().split('').map(c => {
+    if (/[A-Z]/.test(c)) return String.fromCharCode((c.charCodeAt(0) - 65 + shift) % 26 + 65);
+    return c;
+  }).join('');
+}
+
+function updateCaesar() {
+  const text = document.getElementById('caesarInput').value;
+  const key = parseInt(document.getElementById('caesarKey').value) || 3;
+  const out = caesarEncode(text, key);
+  document.getElementById('caesarOutput').textContent = out || '...';
+
+  // Freq analysis
+  const freq = {};
+  out.toUpperCase().replace(/[^A-Z]/g,'').split('').forEach(c => freq[c] = (freq[c]||0)+1);
+  const total = Object.values(freq).reduce((a,b)=>a+b,0);
+  const sorted = Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  document.getElementById('freqAnalysis').innerHTML = sorted.map(([l,n]) =>
+    `${l}: ${'█'.repeat(Math.round(n/total*20))} ${(n/total*100).toFixed(1)}%`
+  ).join('<br>');
+
+  // Alpha table
+  const top = document.getElementById('alphaTop');
+  const bot = document.getElementById('alphaBot');
+  if (!top || !bot) return;
+  top.innerHTML = ''; bot.innerHTML = '';
+  for (let i=0; i<26; i++) {
+    const orig = String.fromCharCode(65+i);
+    const enc  = String.fromCharCode((i+key)%26+65);
+    top.innerHTML += `<td style="padding:6px 8px;border:1px solid rgba(255,255,255,0.07);text-align:center;font-family:var(--font-mono);font-size:0.75rem;color:var(--dim);">${orig}</td>`;
+    bot.innerHTML += `<td style="padding:6px 8px;border:1px solid rgba(255,255,255,0.07);text-align:center;font-family:var(--font-mono);font-size:0.75rem;color:var(--green);">${enc}</td>`;
+  }
+}
+updateCaesar();
+
+// Hash simulation (deterministic fake for demo)
+function simpleHash(str, bits) {
+  let h = bits === 128 ? 0xd41d8cd9 : 0xe3b0c444;
+  for (let i=0; i<str.length; i++) {
+    h = Math.imul(h ^ str.charCodeAt(i), 0x9e3779b9);
+    h = (h << 13) | (h >>> 19);
+  }
+  const hex = bits === 128 ? 32 : 64;
+  let out = '';
+  let seed = h >>> 0;
+  for (let i=0; i<hex; i++) {
+    seed = Math.imul(seed ^ (seed>>>16), 0x45d9f3b);
+    seed = Math.imul(seed ^ (seed>>>16), 0x45d9f3b);
+    seed = seed ^ (seed>>>16);
+    out += (((seed >>> 0) % 16)).toString(16);
+  }
+  return out;
+}
+
+function updateHash() {
+  const v = document.getElementById('hashInput').value;
+  document.getElementById('hashMd5').textContent = simpleHash(v, 128) || '—';
+  document.getElementById('hashSha').textContent = simpleHash(v + 'sha256salt', 256) || '—';
+}
+updateHash();
+
+// Crypto QCM
+const cqData = [
+  { q: "Quelle est la différence entre cryptographie et stéganographie ?", opts:["La crypto est plus ancienne","La crypto transforme le message, la stéganographie cache son existence","La stéganographie est plus sécurisée","Elles sont identiques"], correct:1, expl:"<strong>Crypto</strong> : le message existe et est illisible. <strong>Stéganographie</strong> : on ne sait même pas qu'il y a un message (caché dans une image, du texte, un fichier audio...)." },
+  { q: "Pourquoi AES est-il plus utilisé que RSA pour chiffrer des données ?", opts:["AES est plus récent","AES est plus sûr","AES est 1000x plus rapide que RSA","RSA est illégal"], correct:2, expl:"<strong>AES (symétrique)</strong> est beaucoup plus rapide que <strong>RSA (asymétrique)</strong>. C'est pourquoi HTTPS utilise RSA uniquement pour échanger la clé AES de session, puis AES pour chiffrer les données." },
+  { q: "Qu'est-ce que l'effet avalanche dans une fonction de hachage ?", opts:["Le hash augmente de taille","Changer 1 seul bit de l'entrée change totalement le hash de sortie","Le calcul ralentit avec les grandes données","Le hash s'auto-détruit après utilisation"], correct:1, expl:"L'<strong>effet avalanche</strong> est une propriété essentielle : une modification minimale (1 bit) de l'entrée produit un hash complètement différent. Ex: 'bonjour' et 'bonjour!' donnent des hashes totalement distincts." },
+  { q: "MD5 est-il encore recommandé pour sécuriser des mots de passe ?", opts:["Oui, c'est le standard actuel","Non — des collisions ont été trouvées, il est considéré cassé","Seulement pour les mots de passe courts","Oui si combiné avec SHA-1"], correct:1, expl:"<strong>MD5 est cassé</strong> depuis 2004 (collisions démontrées). SHA-1 aussi. Pour les mots de passe, il faut utiliser <strong>bcrypt, scrypt ou Argon2</strong> qui sont conçus pour être lents (résistants à la force brute)." },
+  { q: "Que signifie le padding (bourrage) dans le chiffrement par blocs ?", opts:["Ajouter du bruit au signal","Compléter le dernier bloc à la taille requise de l'algorithme","Compresser les données","Diviser le message en parties égales"], correct:1, expl:"AES chiffre des blocs de <strong>128 bits exactement</strong>. Si le dernier bloc est plus court, on ajoute du <strong>padding</strong> pour compléter à 128 bits. Plusieurs schémas : PKCS#7, ISO7816, etc." },
+];
+let cqIdx = 0, cqAnswered = [];
+function renderCQ() {
+  const q = cqData[cqIdx];
+  document.getElementById('cqNum').textContent = `${cqIdx+1} / ${cqData.length}`;
+  document.getElementById('cqArea').innerHTML = `
+    <div class="card">
+      <div style="font-family:var(--font-mono);font-size:0.65rem;color:var(--green);letter-spacing:3px;margin-bottom:12px;">QUESTION ${cqIdx+1}</div>
+      <div style="font-size:1rem;font-weight:600;color:#fff;margin-bottom:20px;line-height:1.5;">${q.q}</div>
+      ${q.opts.map((o,i)=>`<div onclick="answerCQ(${i})" style="background:rgba(0,0,0,0.3);border:1px solid ${cqAnswered[cqIdx]!==undefined?(i===q.correct?'var(--green)':cqAnswered[cqIdx]===i?'var(--red)':'rgba(255,255,255,0.08)'):'rgba(255,255,255,0.08)'};border-radius:4px;padding:12px 16px;margin-bottom:10px;cursor:${cqAnswered[cqIdx]!==undefined?'default':'pointer'};font-size:0.88rem;color:${cqAnswered[cqIdx]!==undefined?(i===q.correct?'var(--green)':cqAnswered[cqIdx]===i?'var(--red)':'var(--dim)'):'var(--text)'};display:flex;align-items:center;gap:10px;transition:all 0.2s;">
+        <span style="width:24px;height:24px;border-radius:50%;border:1px solid currentColor;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:0.7rem;flex-shrink:0;">${['A','B','C','D'][i]}</span>${o}</div>`).join('')}
+      ${cqAnswered[cqIdx]!==undefined?`<div style="padding:14px 16px;background:rgba(0,0,0,0.4);border-left:3px solid var(--green);border-radius:0 4px 4px 0;font-size:0.85rem;color:var(--text);line-height:1.65;margin-top:8px;">${cqAnswered[cqIdx]===q.correct?'✅ Correct ! ':'❌ Incorrect. '}${q.expl}</div>`:''}
+    </div>`;
+}
+function answerCQ(i) {
+  if (cqAnswered[cqIdx]!==undefined) return;
+  cqAnswered[cqIdx]=i; renderCQ();
+}
+function nextCQ(){if(cqIdx<cqData.length-1){cqIdx++;renderCQ();}}
+function prevCQ(){if(cqIdx>0){cqIdx--;renderCQ();}}
+renderCQ();
+
+// Scroll reveal
+const obs = new IntersectionObserver(e=>e.forEach(x=>x.isIntersecting&&x.target.classList.add('visible')),{threshold:0.1});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>

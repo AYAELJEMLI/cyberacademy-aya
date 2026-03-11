@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blockchain & Hachage — CyberAcademy</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700;800&display=swap');
+:root{--bg:#020408;--bg2:#060d14;--panel:rgba(255,211,42,0.04);--border:rgba(255,211,42,0.18);--green:#00ff88;--cyan:#00e5ff;--red:#ff3860;--orange:#ff9f43;--yellow:#ffd32a;--purple:#a29bfe;--blue:#74b9ff;--text:#c8d6e5;--dim:rgba(200,214,229,0.5);--font-main:'Exo 2',sans-serif;--font-mono:'Share Tech Mono',monospace;--font-head:'Rajdhani',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--font-main);overflow-x:hidden;}
+body::after{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);pointer-events:none;z-index:1;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(2,4,8,0.92);border-bottom:1px solid var(--border);backdrop-filter:blur(14px);padding:0 40px;height:60px;display:flex;align-items:center;justify-content:space-between;}
+.nav-logo{font-family:var(--font-head);font-size:1.4rem;font-weight:700;color:var(--yellow);letter-spacing:3px;text-decoration:none;}
+.nav-logo span{color:var(--text);}
+.nav-back{font-family:var(--font-mono);font-size:0.75rem;color:var(--dim);text-decoration:none;border:1px solid var(--border);padding:6px 16px;border-radius:3px;transition:all 0.2s;}
+.nav-back:hover{color:var(--yellow);border-color:var(--yellow);}
+.wrapper{position:relative;z-index:2;padding-top:60px;}
+section{padding:80px 80px;}
+.section-tag{font-family:var(--font-mono);font-size:0.65rem;color:var(--yellow);letter-spacing:4px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:10px;}
+.section-tag::before{content:'//';color:var(--dim);}
+h1,h2{font-family:var(--font-head);font-weight:700;letter-spacing:1px;color:#fff;line-height:1.1;}
+h1{font-size:clamp(2.5rem,5vw,4.5rem);margin-bottom:16px;}
+h2{font-size:2rem;margin-bottom:20px;}
+h2 span{color:var(--yellow);}
+p.lead{color:var(--dim);font-size:1rem;line-height:1.7;max-width:650px;margin-bottom:50px;}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:28px;margin-bottom:20px;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.code-block{background:#000;border:1px solid rgba(255,255,255,0.07);border-radius:6px;padding:20px 24px;font-family:var(--font-mono);font-size:0.82rem;line-height:1.9;overflow-x:auto;margin:16px 0;}
+.cmt{color:#455a64;font-style:italic;}.hi{color:#ffd32a;font-weight:700;}.val{color:#81c784;}.kw{color:#a29bfe;}.ok{color:var(--green);}
+.tag{display:inline-block;font-family:var(--font-mono);font-size:0.65rem;border:1px solid currentColor;padding:2px 8px;border-radius:2px;margin:3px;}
+.reveal{opacity:0;transform:translateY(20px);transition:opacity 0.5s,transform 0.5s;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+.btn-sm{background:transparent;color:var(--yellow);border:1px solid var(--yellow);font-family:var(--font-mono);font-size:0.75rem;padding:7px 16px;border-radius:3px;cursor:pointer;transition:all 0.2s;}
+.btn-sm:hover{background:rgba(255,211,42,0.1);}
+
+/* Blockchain visual */
+.chain{display:flex;align-items:stretch;gap:0;overflow-x:auto;padding:10px 0;flex-wrap:nowrap;}
+.block{background:rgba(0,0,0,0.5);border:1px solid rgba(255,211,42,0.3);border-radius:6px;padding:16px;min-width:180px;flex-shrink:0;transition:all 0.3s;cursor:pointer;position:relative;}
+.block:hover{border-color:var(--yellow);box-shadow:0 0 20px rgba(255,211,42,0.15);}
+.block.invalid{border-color:var(--red)!important;background:rgba(255,56,96,0.08)!important;}
+.block-num{font-family:var(--font-mono);font-size:0.6rem;color:var(--yellow);letter-spacing:2px;margin-bottom:8px;}
+.block-data-label{font-size:0.65rem;color:var(--dim);font-family:var(--font-mono);margin-bottom:2px;}
+.block-data{font-size:0.75rem;color:#fff;margin-bottom:8px;word-break:break-all;}
+.block-hash-label{font-size:0.62rem;color:var(--dim);font-family:var(--font-mono);margin-bottom:2px;}
+.block-hash{font-family:var(--font-mono);font-size:0.65rem;color:var(--green);word-break:break-all;line-height:1.4;}
+.block-hash.invalid{color:var(--red)!important;}
+.chain-link{display:flex;align-items:center;padding:0 6px;color:rgba(255,211,42,0.4);font-size:1.2rem;flex-shrink:0;}
+
+/* Mining animation */
+#mineLog{background:#000;border:1px solid var(--border);border-radius:6px;padding:16px;font-family:var(--font-mono);font-size:0.75rem;height:140px;overflow-y:auto;color:var(--dim);line-height:1.8;}
+
+/* Digital signature flow */
+.sig-flow{display:flex;flex-direction:column;gap:8px;}
+.sig-step{display:flex;align-items:center;gap:14px;padding:12px 16px;background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:6px;}
+.sig-num{width:28px;height:28px;border-radius:50%;background:rgba(255,211,42,0.15);border:1px solid var(--yellow);color:var(--yellow);display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:0.75rem;font-weight:700;flex-shrink:0;}
+.sig-text{font-size:0.84rem;color:var(--text);line-height:1.5;}
+.sig-arrow{text-align:center;color:var(--dim);margin:-2px 0;}
+
+@media(max-width:900px){section{padding:60px 24px;}.two-col{grid-template-columns:1fr;}.chain{overflow-x:scroll;}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">Cyber<span>Academy</span></a>
+  <a href="index.html" class="nav-back">← Retour accueil</a>
+</nav>
+<div class="wrapper">
+
+<!-- HERO -->
+<section style="background:var(--bg2);min-height:45vh;display:flex;flex-direction:column;justify-content:center;">
+  <div class="section-tag">Module 06</div>
+  <h1>Blockchain & <span style="color:var(--yellow);">Hachage</span></h1>
+  <p class="lead">Fonctions de hachage, SHA-256, la chaîne de blocs, le minage, les signatures numériques et la PKI. Comment la cryptographie protège la confiance décentralisée.</p>
+</section>
+
+<!-- HACHAGE RAPPEL + EFFET AVALANCHE DEMO -->
+<section>
+  <div class="section-tag">Rappel essentiel</div>
+  <h2>Fonctions de hachage — <span>Effet Avalanche</span></h2>
+  <p style="color:var(--dim);font-size:0.9rem;line-height:1.65;max-width:700px;margin-bottom:20px;">Change un seul caractère ci-dessous et observe que le hash change COMPLÈTEMENT. C'est l'effet avalanche — la propriété qui rend les blockchains infalsifiables.</p>
+  <div style="max-width:640px;" class="reveal">
+    <div style="display:flex;gap:10px;margin-bottom:10px;align-items:center;">
+      <input id="av1" type="text" value="Bitcoin" oninput="updateAvalanche()" style="flex:1;background:rgba(0,0,0,0.5);border:1px solid var(--border);border-radius:4px;padding:10px 14px;color:#fff;font-family:var(--font-mono);font-size:0.9rem;outline:none;">
+      <input id="av2" type="text" value="Bitcoim" oninput="updateAvalanche()" style="flex:1;background:rgba(0,0,0,0.5);border:1px solid rgba(255,56,96,0.3);border-radius:4px;padding:10px 14px;color:#fff;font-family:var(--font-mono);font-size:0.9rem;outline:none;">
+    </div>
+    <div id="avOut1" style="background:rgba(0,255,136,0.06);border:1px solid rgba(0,255,136,0.2);border-radius:4px;padding:12px 16px;font-family:var(--font-mono);font-size:0.72rem;color:var(--green);word-break:break-all;margin-bottom:8px;"></div>
+    <div id="avOut2" style="background:rgba(255,56,96,0.06);border:1px solid rgba(255,56,96,0.2);border-radius:4px;padding:12px 16px;font-family:var(--font-mono);font-size:0.72rem;color:var(--red);word-break:break-all;margin-bottom:8px;"></div>
+    <div id="avDiff" style="font-family:var(--font-mono);font-size:0.75rem;color:var(--yellow);padding:8px 12px;background:rgba(255,211,42,0.07);border-radius:4px;"></div>
+  </div>
+</section>
+
+<!-- BLOCKCHAIN INTERACTIVE -->
+<section style="background:var(--bg2);">
+  <div class="section-tag">Blockchain — concept</div>
+  <h2>La Chaîne de Blocs — <span>Interactive</span></h2>
+  <p style="color:var(--dim);font-size:0.9rem;line-height:1.65;max-width:700px;margin-bottom:20px;">Modifie les données d'un bloc — observe comment toute la chaîne qui suit devient invalide. C'est pour ça qu'une blockchain est infalsifiable !</p>
+
+  <div class="reveal">
+    <div class="chain" id="blockChain"></div>
+    <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
+      <button onclick="addBlock()" class="btn-sm">+ Ajouter un bloc</button>
+      <button onclick="resetChain()" class="btn-sm" style="color:var(--red);border-color:var(--red);">↺ Réinitialiser</button>
+    </div>
+    <p style="font-size:0.8rem;color:var(--dim);margin-top:12px;">💡 Clique sur un bloc pour modifier ses données et voir l'effet en cascade.</p>
+  </div>
+
+  <div class="two-col reveal" style="margin-top:40px;">
+    <div class="card" style="border-left:3px solid var(--yellow);">
+      <div style="font-family:var(--font-head);color:var(--yellow);font-size:1.1rem;margin-bottom:12px;">⛓️ Anatomie d'un bloc</div>
+      <div class="code-block">
+        <span class="hi">BLOC #3</span><br>
+        ├─ <span class="kw">Index</span>      : 3<br>
+        ├─ <span class="kw">Timestamp</span>  : 2024-01-15 14:32:01<br>
+        ├─ <span class="kw">Données</span>    : "Alice → Bob : 5 BTC"<br>
+        ├─ <span class="kw">Nonce</span>      : 48291 (trouvé par minage)<br>
+        ├─ <span class="kw">Hash préc.</span> : 0000a3f8b2...<br>
+        └─ <span class="hi">Hash actuel</span>: 0000c4d9e1...<br>
+        <span class="cmt">SHA-256(index+data+nonce+hashPréc)</span>
+      </div>
+    </div>
+    <div class="card" style="border-left:3px solid var(--green);">
+      <div style="font-family:var(--font-head);color:var(--green);font-size:1.1rem;margin-bottom:12px;">🔗 Pourquoi c'est infalsifiable ?</div>
+      <p style="font-size:0.84rem;color:var(--dim);line-height:1.65;">Chaque bloc contient le <strong style="color:#fff;">hash du bloc précédent</strong>. Si tu modifies le bloc 3, son hash change → le bloc 4 qui référençait l'ancien hash est maintenant invalide → et ainsi de suite jusqu'à la fin.<br><br>Pour falsifier un bloc, il faudrait recalculer le Proof of Work de <strong style="color:var(--red);">TOUS les blocs suivants</strong> plus vite que tous les mineurs honnêtes du réseau réunis (≈51% de la puissance).</p>
+    </div>
+  </div>
+</section>
+
+<!-- MINAGE / PROOF OF WORK -->
+<section>
+  <div class="section-tag">Consensus</div>
+  <h2>Le Minage — <span>Proof of Work</span></h2>
+  <p style="color:var(--dim);font-size:0.9rem;line-height:1.65;max-width:700px;margin-bottom:20px;">Le minage consiste à trouver un <strong style="color:#fff;">nonce</strong> (number used once) tel que le hash du bloc commence par un certain nombre de zéros. C'est un problème difficile à résoudre mais facile à vérifier.</p>
+
+  <div style="max-width:640px;" class="reveal">
+    <div style="display:flex;gap:10px;margin-bottom:14px;align-items:center;flex-wrap:wrap;">
+      <div style="flex:1;min-width:200px;">
+        <div style="font-family:var(--font-mono);font-size:0.65rem;color:var(--dim);letter-spacing:2px;margin-bottom:4px;">DONNÉES DU BLOC</div>
+        <input id="mineData" type="text" value="Alice envoie 1 BTC à Bob" style="width:100%;background:rgba(0,0,0,0.5);border:1px solid var(--border);border-radius:4px;padding:9px 14px;color:#fff;font-family:var(--font-mono);font-size:0.8rem;outline:none;">
+      </div>
+      <div style="width:100px;">
+        <div style="font-family:var(--font-mono);font-size:0.65rem;color:var(--dim);letter-spacing:2px;margin-bottom:4px;">DIFFICULTÉ</div>
+        <select id="mineDiff" style="width:100%;background:rgba(0,0,0,0.5);border:1px solid var(--border);border-radius:4px;padding:9px 10px;color:var(--yellow);font-family:var(--font-mono);font-size:0.8rem;outline:none;">
+          <option value="1">1 zéro</option>
+          <option value="2" selected>2 zéros</option>
+          <option value="3">3 zéros</option>
+        </select>
+      </div>
+      <button onclick="startMining()" class="btn-sm" style="align-self:flex-end;padding:9px 20px;">⛏ Miner !</button>
+    </div>
+    <div id="mineLog">Prêt. Clique sur "Miner" pour commencer...</div>
+    <div id="mineResult" style="margin-top:10px;font-family:var(--font-mono);font-size:0.8rem;"></div>
+  </div>
+</section>
+
+<!-- SIGNATURE NUMÉRIQUE -->
+<section style="background:var(--bg2);">
+  <div class="section-tag">Non-répudiation</div>
+  <h2>Signature <span>Numérique</span></h2>
+  <p style="color:var(--dim);font-size:0.9rem;line-height:1.65;max-width:700px;margin-bottom:30px;">Une signature numérique prouve à la fois l'<strong style="color:#fff;">authenticité</strong> (c'est bien l'auteur) et l'<strong style="color:#fff;">intégrité</strong> (le document n'a pas été modifié). Elle utilise la cryptographie asymétrique + le hachage.</p>
+
+  <div class="two-col reveal">
+    <div>
+      <div style="font-family:var(--font-head);color:#fff;font-size:1.1rem;margin-bottom:16px;">✍️ Créer une signature</div>
+      <div class="sig-flow">
+        <div class="sig-step">
+          <div class="sig-num">1</div>
+          <div class="sig-text">Alice écrit son <strong>document</strong></div>
+        </div>
+        <div class="sig-arrow">↓</div>
+        <div class="sig-step">
+          <div class="sig-num">2</div>
+          <div class="sig-text">Alice calcule le <strong style="color:var(--yellow);">hash du document</strong> (SHA-256)</div>
+        </div>
+        <div class="sig-arrow">↓</div>
+        <div class="sig-step">
+          <div class="sig-num">3</div>
+          <div class="sig-text">Alice chiffre ce hash avec sa <strong style="color:var(--red);">clé privée RSA</strong> → c'est la signature</div>
+        </div>
+        <div class="sig-arrow">↓</div>
+        <div class="sig-step">
+          <div class="sig-num">4</div>
+          <div class="sig-text">Alice envoie le <strong>document + signature</strong> à Bob</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div style="font-family:var(--font-head);color:#fff;font-size:1.1rem;margin-bottom:16px;">✅ Vérifier une signature</div>
+      <div class="sig-flow">
+        <div class="sig-step">
+          <div class="sig-num">1</div>
+          <div class="sig-text">Bob reçoit le document + signature</div>
+        </div>
+        <div class="sig-arrow">↓</div>
+        <div class="sig-step">
+          <div class="sig-num">2</div>
+          <div class="sig-text">Bob déchiffre la signature avec la <strong style="color:var(--green);">clé publique d'Alice</strong> → obtient le hash H1</div>
+        </div>
+        <div class="sig-arrow">↓</div>
+        <div class="sig-step">
+          <div class="sig-num">3</div>
+          <div class="sig-text">Bob calcule lui-même le hash du document reçu → H2</div>
+        </div>
+        <div class="sig-arrow">↓</div>
+        <div class="sig-step" style="border-color:rgba(0,255,136,0.3);">
+          <div class="sig-num" style="border-color:var(--green);color:var(--green);">4</div>
+          <div class="sig-text">Si <strong style="color:var(--green);">H1 = H2</strong> → document authentique et non modifié ✅</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card reveal" style="margin-top:20px;border-left:3px solid var(--cyan);">
+    <div style="font-family:var(--font-head);color:var(--cyan);font-size:1rem;margin-bottom:10px;">📜 PKI — Public Key Infrastructure</div>
+    <p style="font-size:0.84rem;color:var(--dim);line-height:1.65;">Mais comment Bob sait que la clé publique appartient vraiment à Alice et pas à un imposteur ? C'est là qu'intervient la <strong style="color:#fff;">PKI</strong>. Une <strong style="color:#fff;">Autorité de Certification (CA)</strong> émet un <strong style="color:#fff;">certificat numérique</strong> qui lie l'identité d'Alice à sa clé publique. Le CA signe ce certificat avec sa propre clé privée. C'est la base de <strong style="color:#fff;">HTTPS</strong> — le cadenas dans ton navigateur est un certificat signé par une CA de confiance.</p>
+  </div>
+</section>
+
+<!-- QCM BLOCKCHAIN -->
+<section>
+  <div class="section-tag">Entraînement — Module 06</div>
+  <h2>QCM <span>Blockchain</span></h2>
+  <div style="max-width:700px;">
+    <div id="bqArea"></div>
+    <div style="display:flex;justify-content:space-between;margin-top:20px;align-items:center;">
+      <button onclick="prevBQ()" class="btn-sm">← Préc.</button>
+      <span id="bqNum" style="font-family:var(--font-mono);font-size:0.8rem;color:var(--dim);"></span>
+      <button onclick="nextBQ()" class="btn-sm">Suiv. →</button>
+    </div>
+  </div>
+</section>
+
+</div>
+<script>
+// Simple deterministic hash
+function simHash(s, salt='') {
+  let h = 0x811c9dc5;
+  const str = s + salt;
+  for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,0x01000193);}
+  h=h>>>0;
+  let out='';
+  let seed=h;
+  for(let i=0;i<64;i++){
+    seed=Math.imul(seed^(seed>>>16),0x45d9f3b);
+    seed=Math.imul(seed^(seed>>>16),0x45d9f3b);
+    seed=seed^(seed>>>16);
+    out+=((seed>>>0)%16).toString(16);
+  }
+  return out;
+}
+
+// Avalanche demo
+function updateAvalanche(){
+  const v1=document.getElementById('av1').value;
+  const v2=document.getElementById('av2').value;
+  const h1=simHash(v1,'sha256');
+  const h2=simHash(v2,'sha256');
+  document.getElementById('avOut1').textContent='SHA-256("'+v1+'"): '+h1;
+  document.getElementById('avOut2').textContent='SHA-256("'+v2+'"): '+h2;
+  let diff=0;
+  for(let i=0;i<Math.min(h1.length,h2.length);i++) if(h1[i]!==h2[i]) diff++;
+  const pct=Math.round(diff/h1.length*100);
+  document.getElementById('avDiff').textContent=`⚡ ${diff}/64 caractères différents (${pct}%) — effet avalanche`;
+}
+updateAvalanche();
+
+// Blockchain
+let blocks=[
+  {index:0,data:'Genesis Block',prev:'0000000000000000',nonce:0},
+  {index:1,data:'Alice → Bob : 2 BTC',prev:'',nonce:42},
+  {index:2,data:'Bob → Charlie : 1 BTC',prev:'',nonce:137},
+];
+
+function blockHash(b){
+  return simHash(b.index+b.data+b.nonce+b.prev, 'block');
+}
+
+function buildChain(){
+  for(let i=1;i<blocks.length;i++){
+    blocks[i].prev=blockHash(blocks[i-1]);
+  }
+}
+
+function renderChain(){
+  buildChain();
+  const el=document.getElementById('blockChain');
+  el.innerHTML='';
+  blocks.forEach((b,i)=>{
+    const hash=blockHash(b);
+    const valid=i===0||(b.prev===blockHash(blocks[i-1]));
+    const div=document.createElement('div');
+    div.className='block'+(valid?'':' invalid');
+    div.innerHTML=`
+      <div class="block-num">BLOC #${b.index}</div>
+      <div class="block-data-label">Données :</div>
+      <div class="block-data">${b.data}</div>
+      <div class="block-hash-label">Hash préc. :</div>
+      <div class="block-hash" style="font-size:0.6rem;color:var(--dim);">${b.prev.substring(0,16)}...</div>
+      <div class="block-hash-label" style="margin-top:6px;">Hash actuel :</div>
+      <div class="block-hash ${valid?'':'invalid'}">${hash.substring(0,16)}...</div>
+      ${!valid?'<div style="color:var(--red);font-size:0.7rem;margin-top:8px;font-family:var(--font-mono);">⚠ INVALIDE</div>':''}
+    `;
+    div.onclick=()=>{
+      const nd=prompt('Modifier les données du bloc #'+b.index+' :',b.data);
+      if(nd!==null){blocks[i].data=nd;renderChain();}
+    };
+    el.appendChild(div);
+    if(i<blocks.length-1){
+      const link=document.createElement('div');
+      link.className='chain-link';
+      link.textContent='→';
+      el.appendChild(link);
+    }
+  });
+}
+
+function addBlock(){
+  const last=blocks[blocks.length-1];
+  blocks.push({index:blocks.length,data:'Transaction #'+blocks.length,prev:blockHash(last),nonce:Math.floor(Math.random()*999)});
+  renderChain();
+}
+function resetChain(){
+  blocks=[
+    {index:0,data:'Genesis Block',prev:'0000000000000000',nonce:0},
+    {index:1,data:'Alice → Bob : 2 BTC',prev:'',nonce:42},
+    {index:2,data:'Bob → Charlie : 1 BTC',prev:'',nonce:137},
+  ];
+  renderChain();
+}
+renderChain();
+
+// Mining simulation
+function startMining(){
+  const data=document.getElementById('mineData').value;
+  const diff=parseInt(document.getElementById('mineDiff').value);
+  const prefix='0'.repeat(diff);
+  const log=document.getElementById('mineLog');
+  const res=document.getElementById('mineResult');
+  log.textContent='';
+  res.textContent='';
+  let nonce=0, found=false;
+  const maxTries=100000;
+
+  function tryBatch(){
+    const batchSize=500;
+    for(let i=0;i<batchSize&&nonce<maxTries;i++,nonce++){
+      const h=simHash(data+nonce,'mine');
+      if(nonce%1000===0){
+        log.textContent+=`Nonce ${nonce} → ${h.substring(0,20)}...\n`;
+        log.scrollTop=log.scrollHeight;
+      }
+      if(h.startsWith(prefix)){
+        log.textContent+=`\n✅ TROUVÉ ! Nonce = ${nonce}\nHash = ${h}\n`;
+        log.scrollTop=log.scrollHeight;
+        res.innerHTML=`<span style="color:var(--green);">⛏ Bloc miné ! Nonce = ${nonce} | Hash = <span style="color:var(--yellow);">${h.substring(0,24)}...</span></span>`;
+        found=true;
+        break;
+      }
+    }
+    if(!found&&nonce<maxTries) requestAnimationFrame(tryBatch);
+    else if(!found){res.innerHTML=`<span style="color:var(--red);">Limite atteinte. Essaie difficulté 1 ou 2.</span>`;}
+  }
+  requestAnimationFrame(tryBatch);
+}
+
+// QCM
+const bqData=[
+  {q:"Qu'est-ce que le Proof of Work dans une blockchain ?",opts:["Preuve que tu as payé","Trouver un nonce tel que SHA-256(données+nonce) commence par N zéros","Un contrat intelligent","La signature numérique du bloc"],correct:1,expl:"Le <strong>Proof of Work</strong> oblige les mineurs à trouver un <strong>nonce</strong> qui, combiné aux données du bloc, produit un hash commençant par un certain nombre de zéros. C'est coûteux en calcul (preuve de travail) mais facile à vérifier."},
+  {q:"Pourquoi est-il impossible de falsifier un bloc passé dans une blockchain ?",opts:["C'est protégé par un mot de passe","Modifier un bloc change son hash → invalide tous les blocs suivants → nécessite recalculer le PoW de tous","Le bloc est chiffré","La police surveille la blockchain"],correct:1,expl:"Chaque bloc contient le <strong>hash du bloc précédent</strong>. Modifier un bloc change son hash, ce qui invalide le bloc suivant (qui référençait l'ancien hash), et ainsi de suite. Il faudrait recalculer le PoW de <em>tous</em> les blocs suivants plus vite que le réseau entier."},
+  {q:"Dans une signature numérique, avec quelle clé signe-t-on ?",opts:["La clé publique de l'expéditeur","La clé privée de l'expéditeur","La clé publique du destinataire","La clé partagée"],correct:1,expl:"On signe avec sa <strong>clé privée</strong> (que seul vous possédez). N'importe qui peut vérifier avec votre <strong>clé publique</strong>. Ainsi : si la vérification réussit → seul vous pouviez avoir signé (non-répudiation)."},
+  {q:"Qu'est-ce qu'une PKI ?",opts:["Un algorithme de chiffrement","Infrastructure qui gère les certificats numériques, liant identités et clés publiques","Un protocole réseau","Un type de pare-feu"],correct:1,expl:"<strong>PKI (Public Key Infrastructure)</strong> : système de gestion des certificats numériques. Une Autorité de Certification (CA) certifie que telle clé publique appartient à telle entité. HTTPS utilise la PKI — le cadenas de ton navigateur est un certificat PKI."},
+  {q:"Quelle est la propriété 'résistance aux collisions' d'une fonction de hachage ?",opts:["Le hash résiste aux collisions physiques","Impossible (en pratique) de trouver deux entrées différentes produisant le même hash","Le hash ne change jamais","La collision accélère le calcul"],correct:1,expl:"<strong>Résistance aux collisions</strong> : il doit être computationnellement impossible de trouver deux messages M1≠M2 tels que SHA256(M1)=SHA256(M2). MD5 est cassé (collisions trouvées). SHA-256 est résistant aux collisions connues."},
+];
+let bqIdx=0,bqA=[];
+function renderBQ(){
+  const q=bqData[bqIdx];
+  document.getElementById('bqNum').textContent=`${bqIdx+1} / ${bqData.length}`;
+  document.getElementById('bqArea').innerHTML=`<div class="card"><div style="font-family:var(--font-mono);font-size:0.65rem;color:var(--yellow);letter-spacing:3px;margin-bottom:12px;">QUESTION ${bqIdx+1}</div><div style="font-size:1rem;font-weight:600;color:#fff;margin-bottom:20px;line-height:1.5;">${q.q}</div>${q.opts.map((o,i)=>`<div onclick="answerBQ(${i})" style="background:rgba(0,0,0,0.3);border:1px solid ${bqA[bqIdx]!==undefined?(i===q.correct?'var(--green)':bqA[bqIdx]===i?'var(--red)':'rgba(255,255,255,0.08)'):'rgba(255,255,255,0.08)'};border-radius:4px;padding:12px 16px;margin-bottom:10px;cursor:${bqA[bqIdx]!==undefined?'default':'pointer'};font-size:0.88rem;color:${bqA[bqIdx]!==undefined?(i===q.correct?'var(--green)':bqA[bqIdx]===i?'var(--red)':'var(--dim)'):'var(--text)'};display:flex;align-items:center;gap:10px;"><span style="width:24px;height:24px;border-radius:50%;border:1px solid currentColor;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:0.7rem;flex-shrink:0;">${['A','B','C','D'][i]}</span>${o}</div>`).join('')}${bqA[bqIdx]!==undefined?`<div style="padding:14px;background:rgba(0,0,0,0.4);border-left:3px solid var(--green);font-size:0.85rem;color:var(--text);line-height:1.65;margin-top:8px;">${bqA[bqIdx]===q.correct?'✅ Correct ! ':'❌ Incorrect. '}${q.expl}</div>`:''}</div>`;
+}
+function answerBQ(i){if(bqA[bqIdx]!==undefined)return;bqA[bqIdx]=i;renderBQ();}
+function nextBQ(){if(bqIdx<bqData.length-1){bqIdx++;renderBQ();}}
+function prevBQ(){if(bqIdx>0){bqIdx--;renderBQ();}}
+renderBQ();
+
+const obs=new IntersectionObserver(e=>e.forEach(x=>x.isIntersecting&&x.target.classList.add('visible')),{threshold:0.1});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>

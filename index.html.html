@@ -1,0 +1,1615 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CyberAcademy — Maîtriser la Cybersécurité</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700;800&display=swap');
+
+:root {
+  --bg: #020408;
+  --bg2: #060d14;
+  --panel: rgba(0,255,136,0.04);
+  --border: rgba(0,255,136,0.15);
+  --green: #00ff88;
+  --green2: #00cc6a;
+  --cyan: #00e5ff;
+  --red: #ff3860;
+  --orange: #ff9f43;
+  --yellow: #ffd32a;
+  --purple: #a29bfe;
+  --blue: #74b9ff;
+  --text: #c8d6e5;
+  --dim: rgba(200,214,229,0.5);
+  --font-main: 'Exo 2', sans-serif;
+  --font-mono: 'Share Tech Mono', monospace;
+  --font-head: 'Rajdhani', sans-serif;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-main);
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* ── CUSTOM CURSOR ─────────────────────────────── */
+.cursor {
+  width: 12px; height: 12px;
+  background: var(--green);
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%,-50%);
+  transition: transform 0.1s;
+  box-shadow: 0 0 20px var(--green), 0 0 40px rgba(0,255,136,0.3);
+  mix-blend-mode: screen;
+}
+.cursor-ring {
+  width: 36px; height: 36px;
+  border: 1px solid rgba(0,255,136,0.5);
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 9998;
+  transform: translate(-50%,-50%);
+  transition: all 0.15s ease;
+}
+
+/* ── MATRIX CANVAS ──────────────────────────────── */
+#matrix-bg {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  opacity: 0.04;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ── SCANLINES ──────────────────────────────────── */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.03) 2px,
+    rgba(0,0,0,0.03) 4px
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── MAIN LAYOUT ─────────────────────────────────── */
+.wrapper { position: relative; z-index: 2; }
+
+/* ── NAVBAR ──────────────────────────────────────── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  background: rgba(2,4,8,0.9);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  padding: 0 40px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.nav-logo {
+  font-family: var(--font-head);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--green);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+.nav-logo span { color: var(--text); }
+.nav-links { display: flex; gap: 6px; align-items: center; }
+.nav-links a {
+  color: var(--dim);
+  text-decoration: none;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  padding: 6px 14px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+  letter-spacing: 1px;
+}
+.nav-links a:hover {
+  color: var(--green);
+  border-color: var(--border);
+  background: var(--panel);
+}
+.nav-badge {
+  background: var(--green);
+  color: #000;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  padding: 3px 10px;
+  border-radius: 2px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* ── HERO ────────────────────────────────────────── */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 120px 80px 80px;
+  position: relative;
+}
+.hero-tag {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--green);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.hero-tag::before {
+  content: '';
+  width: 30px; height: 1px;
+  background: var(--green);
+}
+.hero h1 {
+  font-family: var(--font-head);
+  font-size: clamp(3rem, 7vw, 6rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 2px;
+  margin-bottom: 16px;
+}
+.hero h1 .line1 { color: #fff; display: block; }
+.hero h1 .line2 {
+  color: transparent;
+  -webkit-text-stroke: 1px var(--green);
+  display: block;
+}
+.hero h1 .line3 {
+  color: var(--green);
+  display: block;
+  text-shadow: 0 0 30px rgba(0,255,136,0.5);
+}
+.hero-desc {
+  max-width: 520px;
+  font-size: 1rem;
+  color: var(--dim);
+  line-height: 1.7;
+  margin-bottom: 40px;
+}
+.hero-cta {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.btn-primary {
+  background: var(--green);
+  color: #000;
+  font-family: var(--font-head);
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 14px 32px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 0.4s;
+}
+.btn-primary:hover::before { left: 100%; }
+.btn-primary:hover { box-shadow: 0 0 30px rgba(0,255,136,0.5); }
+
+.btn-outline {
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font-head);
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 13px 32px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.2s;
+}
+.btn-outline:hover {
+  border-color: var(--green);
+  color: var(--green);
+  background: var(--panel);
+}
+
+/* ── HERO STATS ──────────────────────────────────── */
+.hero-stats {
+  position: absolute;
+  right: 80px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.stat-item {
+  text-align: right;
+  border-right: 2px solid var(--border);
+  padding-right: 20px;
+}
+.stat-num {
+  font-family: var(--font-head);
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--green);
+  line-height: 1;
+  counter-reset: none;
+}
+.stat-label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--dim);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* ── SECTION COMMON ──────────────────────────────── */
+section {
+  padding: 100px 80px;
+  position: relative;
+}
+.section-tag {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--green);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: flex; align-items: center; gap: 10px;
+}
+.section-tag::before { content: '//'; color: var(--dim); }
+.section-title {
+  font-family: var(--font-head);
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+  line-height: 1.1;
+}
+.section-title span { color: var(--green); }
+.section-sub {
+  color: var(--dim);
+  font-size: 0.95rem;
+  max-width: 600px;
+  line-height: 1.7;
+  margin-bottom: 60px;
+}
+
+/* ── MODULE GRID ─────────────────────────────────── */
+#modules { background: var(--bg2); }
+.modules-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+.module-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 28px;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+.module-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 3px; height: 100%;
+  background: var(--accent, var(--green));
+  transition: width 0.3s;
+}
+.module-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent, var(--green));
+  background: rgba(0,255,136,0.07);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+.module-card:hover::before { width: 5px; }
+.module-icon {
+  font-size: 2rem;
+  margin-bottom: 14px;
+  display: block;
+}
+.module-num {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--accent, var(--green));
+  letter-spacing: 3px;
+  margin-bottom: 6px;
+}
+.module-name {
+  font-family: var(--font-head);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 10px;
+}
+.module-desc {
+  font-size: 0.83rem;
+  color: var(--dim);
+  line-height: 1.6;
+  margin-bottom: 18px;
+}
+.module-topics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.topic-tag {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--accent, var(--green));
+  border: 1px solid currentColor;
+  padding: 2px 8px;
+  border-radius: 2px;
+  opacity: 0.7;
+}
+.module-progress {
+  margin-top: 20px;
+  height: 2px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 1px;
+  overflow: hidden;
+}
+.module-progress-bar {
+  height: 100%;
+  background: var(--accent, var(--green));
+  border-radius: 1px;
+  width: 0;
+  transition: width 1s ease;
+}
+
+/* ── FUNDAMENTALS ────────────────────────────────── */
+#fondamentaux { background: var(--bg); }
+.pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  margin-bottom: 60px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.pillar {
+  background: var(--panel);
+  padding: 36px 28px;
+  border-right: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+.pillar:last-child { border-right: none; }
+.pillar::after {
+  content: attr(data-letter);
+  position: absolute;
+  right: 20px;
+  bottom: -10px;
+  font-family: var(--font-head);
+  font-size: 5rem;
+  font-weight: 900;
+  color: currentColor;
+  opacity: 0.05;
+  line-height: 1;
+}
+.pillar-letter {
+  font-family: var(--font-head);
+  font-size: 3.5rem;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.pillar-name {
+  font-family: var(--font-head);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+}
+.pillar-desc {
+  font-size: 0.83rem;
+  color: var(--dim);
+  line-height: 1.65;
+}
+.pillar-example {
+  margin-top: 14px;
+  padding: 10px 14px;
+  background: rgba(0,0,0,0.3);
+  border-radius: 4px;
+  border-left: 3px solid currentColor;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--dim);
+  line-height: 1.5;
+}
+
+/* ── NETWORK SECTION ─────────────────────────────── */
+#reseau { background: var(--bg2); }
+.osi-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  margin-bottom: 40px;
+}
+.osi-table thead tr {
+  border-bottom: 2px solid var(--border);
+}
+.osi-table th {
+  padding: 12px 20px;
+  text-align: left;
+  color: var(--green);
+  font-size: 0.65rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+.osi-table td {
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(0,255,136,0.06);
+  vertical-align: top;
+  line-height: 1.5;
+}
+.osi-table tr:hover td { background: var(--panel); }
+.osi-table .layer-num {
+  color: var(--green);
+  font-weight: 700;
+  font-size: 1rem;
+}
+.osi-table .layer-name { color: #fff; }
+.osi-table .layer-proto { color: var(--cyan); font-size: 0.73rem; }
+.osi-table .layer-role { color: var(--dim); }
+.osi-table .layer-device { color: var(--orange); font-size: 0.73rem; }
+
+/* ── ANIM SECTION ────────────────────────────────── */
+.anim-box {
+  background: rgba(0,0,0,0.5);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 24px;
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+}
+.anim-box-title {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--green);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.anim-box-title .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: blink 1s infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+/* ── QCM SECTION ─────────────────────────────────── */
+#qcm { background: var(--bg); }
+.qcm-container { max-width: 800px; }
+.qcm-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 28px;
+  margin-bottom: 20px;
+  display: none;
+}
+.qcm-card.active { display: block; animation: fadeUp 0.3s ease; }
+@keyframes fadeUp {
+  from { opacity:0; transform: translateY(12px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+.qcm-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+.qcm-num {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--green);
+  letter-spacing: 3px;
+}
+.qcm-difficulty {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  padding: 3px 10px;
+  border-radius: 2px;
+}
+.diff-easy { background: rgba(0,255,136,0.15); color: var(--green); }
+.diff-med  { background: rgba(255,159,67,0.15); color: var(--orange); }
+.diff-hard { background: rgba(255,56,96,0.15); color: var(--red); }
+.qcm-question {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 22px;
+  line-height: 1.5;
+}
+.qcm-options { display: flex; flex-direction: column; gap: 10px; }
+.qcm-option {
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 4px;
+  padding: 14px 18px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.qcm-option:hover:not(.locked) {
+  border-color: var(--green);
+  background: var(--panel);
+}
+.qcm-option.correct {
+  border-color: var(--green);
+  background: rgba(0,255,136,0.1);
+  color: var(--green);
+}
+.qcm-option.wrong {
+  border-color: var(--red);
+  background: rgba(255,56,96,0.1);
+  color: var(--red);
+}
+.option-letter {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  flex-shrink: 0;
+}
+.qcm-option.correct .option-letter { border-color: var(--green); background: rgba(0,255,136,0.2); color: var(--green); }
+.qcm-option.wrong .option-letter { border-color: var(--red); background: rgba(255,56,96,0.2); color: var(--red); }
+
+.qcm-explanation {
+  display: none;
+  margin-top: 18px;
+  padding: 16px 18px;
+  background: rgba(0,0,0,0.4);
+  border-left: 3px solid var(--green);
+  border-radius: 0 4px 4px 0;
+  font-size: 0.85rem;
+  color: var(--text);
+  line-height: 1.65;
+}
+.qcm-explanation.show { display: block; animation: fadeUp 0.3s ease; }
+.qcm-explanation strong { color: var(--green); }
+
+.qcm-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 28px;
+}
+.qcm-score {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--dim);
+}
+.qcm-score span { color: var(--green); font-size: 1.1rem; }
+.qcm-progress {
+  flex: 1;
+  height: 3px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 2px;
+  margin: 0 20px;
+  overflow: hidden;
+}
+.qcm-progress-fill {
+  height: 100%;
+  background: var(--green);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+/* ── GLOSSARY ────────────────────────────────────── */
+#glossaire { background: var(--bg2); }
+.gloss-search {
+  background: rgba(0,0,0,0.4);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 14px 20px;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  width: 100%;
+  max-width: 500px;
+  outline: none;
+  margin-bottom: 30px;
+  display: block;
+}
+.gloss-search:focus { border-color: var(--green); box-shadow: 0 0 15px rgba(0,255,136,0.1); }
+.gloss-search::placeholder { color: var(--dim); }
+.gloss-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+.gloss-item {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 16px 18px;
+  transition: all 0.2s;
+}
+.gloss-item:hover { border-color: var(--green); }
+.gloss-item.hidden { display: none; }
+.gloss-term {
+  font-family: var(--font-head);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--green);
+  margin-bottom: 4px;
+  letter-spacing: 1px;
+}
+.gloss-full {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--dim);
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+}
+.gloss-def {
+  font-size: 0.82rem;
+  color: var(--text);
+  line-height: 1.6;
+}
+.gloss-module {
+  margin-top: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--cyan);
+  border: 1px solid currentColor;
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 2px;
+  opacity: 0.7;
+}
+
+/* ── RESOURCES ───────────────────────────────────── */
+#ressources { background: var(--bg); }
+.resources-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+.resource-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 22px;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  transition: all 0.2s;
+}
+.resource-card:hover {
+  border-color: var(--accent, var(--green));
+  transform: translateY(-3px);
+  box-shadow: 0 16px 32px rgba(0,0,0,0.3);
+}
+.resource-type {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--accent, var(--green));
+  margin-bottom: 8px;
+}
+.resource-name {
+  font-family: var(--font-head);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 6px;
+}
+.resource-desc {
+  font-size: 0.8rem;
+  color: var(--dim);
+  line-height: 1.6;
+}
+.resource-link {
+  margin-top: 12px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--accent, var(--green));
+  opacity: 0.7;
+}
+
+/* ── FOOTER ──────────────────────────────────────── */
+footer {
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  padding: 40px 80px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: gap;
+}
+.footer-logo {
+  font-family: var(--font-head);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--green);
+  letter-spacing: 3px;
+}
+.footer-text {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--dim);
+  letter-spacing: 1px;
+}
+
+/* ── SCROLL REVEAL ───────────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── GLITCH EFFECT ───────────────────────────────── */
+@keyframes glitch1 {
+  0%, 95%, 100% { clip-path: none; transform: none; }
+  96% { clip-path: polygon(0 20%, 100% 20%, 100% 40%, 0 40%); transform: translateX(-3px); }
+  97% { clip-path: polygon(0 60%, 100% 60%, 100% 80%, 0 80%); transform: translateX(3px); }
+  98% { clip-path: none; transform: none; }
+}
+.glitch { animation: glitch1 4s infinite; }
+
+/* ── RESPONSIVE ──────────────────────────────────── */
+@media (max-width: 900px) {
+  nav { padding: 0 20px; }
+  .nav-links { display: none; }
+  .hero { padding: 100px 24px 60px; }
+  .hero-stats { display: none; }
+  section { padding: 70px 24px; }
+  .pillars-grid { grid-template-columns: 1fr; }
+  footer { padding: 30px 24px; flex-direction: column; gap: 10px; text-align: center; }
+}
+
+/* ── TOOLTIP ─────────────────────────────────────── */
+[data-tooltip] { position: relative; }
+[data-tooltip]:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.9);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  padding: 6px 12px;
+  border-radius: 3px;
+  white-space: nowrap;
+  z-index: 200;
+  pointer-events: none;
+}
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<canvas id="matrix-bg"></canvas>
+
+<div class="wrapper">
+
+<!-- ── NAVBAR ──────────────────────────────────── -->
+<nav>
+  <a href="index.html" class="nav-logo">Cyber<span>Academy</span></a>
+  <div class="nav-links">
+    <a href="#modules">Modules</a>
+    <a href="#fondamentaux">Bases</a>
+    <a href="#reseau">Réseau</a>
+    <a href="crypto.html">Crypto</a>
+    <a href="intrusion.html">Intrusion</a>
+    <a href="#qcm">QCM</a>
+    <a href="#glossaire">Glossaire</a>
+    <span class="nav-badge">4ème Année</span>
+  </div>
+</nav>
+
+<!-- ── HERO ──────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-tag">Génie Informatique — Cybersécurité</div>
+  <h1>
+    <span class="line1">MAÎTRISER</span>
+    <span class="line2 glitch">LA CYBER</span>
+    <span class="line3">SÉCURITÉ</span>
+  </h1>
+  <p class="hero-desc">
+    De zéro à experte. Tout ce que tu dois savoir — des fondamentaux réseau à la cryptographie avancée, en passant par la gestion des intrusions, les VPN, la blockchain et bien plus.
+    Chaque concept expliqué avec des animations, des exemples concrets et des QCM pour tester tes connaissances.
+  </p>
+  <div class="hero-cta">
+    <a href="#modules" class="btn-primary">Commencer l'apprentissage</a>
+    <a href="#qcm" class="btn-outline">Tester mes connaissances</a>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat-item">
+      <div class="stat-num" data-count="6">6</div>
+      <div class="stat-label">Modules complets</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" data-count="120">120+</div>
+      <div class="stat-label">Concepts expliqués</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" data-count="80">80+</div>
+      <div class="stat-label">Questions QCM</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" data-count="60">60+</div>
+      <div class="stat-label">Termes glossaire</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── MODULES ────────────────────────────────────── -->
+<section id="modules">
+  <div class="section-tag">Navigation</div>
+  <h2 class="section-title">Les <span>6 Modules</span><br>de ta formation</h2>
+  <p class="section-sub">Chaque module contient le cours complet, les animations interactives, les schémas détaillés et des exercices QCM notés.</p>
+
+  <div class="modules-grid reveal">
+    <a href="crypto.html" class="module-card" style="--accent: #00ff88;">
+      <span class="module-icon">🔐</span>
+      <div class="module-num">MODULE 01</div>
+      <div class="module-name">Cryptographie</div>
+      <div class="module-desc">Chiffrement symétrique & asymétrique, hachage, substitution, transposition, XOR, AES, RSA, et toute la théorie des clés.</div>
+      <div class="module-topics">
+        <span class="topic-tag">Caesar</span>
+        <span class="topic-tag">AES/DES</span>
+        <span class="topic-tag">RSA</span>
+        <span class="topic-tag">SHA-256</span>
+        <span class="topic-tag">XOR</span>
+        <span class="topic-tag">Vigenère</span>
+      </div>
+      <div class="module-progress"><div class="module-progress-bar" data-w="85"></div></div>
+    </a>
+
+    <a href="intrusion.html" class="module-card" style="--accent: #ff3860;">
+      <span class="module-icon">🚨</span>
+      <div class="module-num">MODULE 02</div>
+      <div class="module-name">Gestion des Intrusions</div>
+      <div class="module-desc">IDS, IPS, pare-feu, DMZ, CVE, Zero-Day, CVSS, types d'attaques, MITRE ATT&CK, cycle de vie d'une vulnérabilité.</div>
+      <div class="module-topics">
+        <span class="topic-tag" style="color:#ff3860;">IDS/IPS</span>
+        <span class="topic-tag" style="color:#ff3860;">CVE</span>
+        <span class="topic-tag" style="color:#ff3860;">Firewall</span>
+        <span class="topic-tag" style="color:#ff3860;">DMZ</span>
+        <span class="topic-tag" style="color:#ff3860;">Zero-Day</span>
+      </div>
+      <div class="module-progress"><div class="module-progress-bar" style="background:#ff3860;" data-w="90"></div></div>
+    </a>
+
+    <a href="vpn.html" class="module-card" style="--accent: #74b9ff;">
+      <span class="module-icon">🛡️</span>
+      <div class="module-num">MODULE 03</div>
+      <div class="module-name">VPN & Sécurité Réseau</div>
+      <div class="module-desc">CIA triad, VPN, IPSec, TLS/SSL, protocoles réseau, pare-feu applicatif, QoS, VLAN, ZTNA et Zero Trust.</div>
+      <div class="module-topics">
+        <span class="topic-tag" style="color:#74b9ff;">CIA</span>
+        <span class="topic-tag" style="color:#74b9ff;">IPSec</span>
+        <span class="topic-tag" style="color:#74b9ff;">TLS</span>
+        <span class="topic-tag" style="color:#74b9ff;">VLAN</span>
+        <span class="topic-tag" style="color:#74b9ff;">ZTNA</span>
+      </div>
+      <div class="module-progress"><div class="module-progress-bar" style="background:#74b9ff;" data-w="75"></div></div>
+    </a>
+
+    <a href="intrusion.html" class="module-card" style="--accent: #ff9f43;">
+      <span class="module-icon">⚡</span>
+      <div class="module-num">MODULE 04</div>
+      <div class="module-name">Gestion des Incidents</div>
+      <div class="module-desc">SIEM, SOC, réponse aux incidents, classification, containment, recovery, forensics et post-mortem.</div>
+      <div class="module-topics">
+        <span class="topic-tag" style="color:#ff9f43;">SIEM</span>
+        <span class="topic-tag" style="color:#ff9f43;">SOC</span>
+        <span class="topic-tag" style="color:#ff9f43;">Forensics</span>
+        <span class="topic-tag" style="color:#ff9f43;">IR Plan</span>
+      </div>
+      <div class="module-progress"><div class="module-progress-bar" style="background:#ff9f43;" data-w="70"></div></div>
+    </a>
+
+    <a href="mobile.html" class="module-card" style="--accent: #a29bfe;">
+      <span class="module-icon">📱</span>
+      <div class="module-num">MODULE 05</div>
+      <div class="module-name">Sécurité Mobile & Web</div>
+      <div class="module-desc">Android APK, sandbox, ADB, OWASP Top 10, XSS, SQLi, CSRF, sécurité iOS, applications malveillantes, DDoS.</div>
+      <div class="module-topics">
+        <span class="topic-tag" style="color:#a29bfe;">APK</span>
+        <span class="topic-tag" style="color:#a29bfe;">OWASP</span>
+        <span class="topic-tag" style="color:#a29bfe;">XSS</span>
+        <span class="topic-tag" style="color:#a29bfe;">SQLi</span>
+        <span class="topic-tag" style="color:#a29bfe;">DDoS</span>
+      </div>
+      <div class="module-progress"><div class="module-progress-bar" style="background:#a29bfe;" data-w="65"></div></div>
+    </a>
+
+    <a href="blockchain.html" class="module-card" style="--accent: #ffd32a;">
+      <span class="module-icon">⛓️</span>
+      <div class="module-num">MODULE 06</div>
+      <div class="module-name">Blockchain & Hachage</div>
+      <div class="module-desc">Fonctions de hachage, SHA-256, MD5, chaîne de blocs, consensus, signatures numériques, OTP et PKI.</div>
+      <div class="module-topics">
+        <span class="topic-tag" style="color:#ffd32a;">SHA-256</span>
+        <span class="topic-tag" style="color:#ffd32a;">Merkle</span>
+        <span class="topic-tag" style="color:#ffd32a;">Proof of Work</span>
+        <span class="topic-tag" style="color:#ffd32a;">OTP</span>
+      </div>
+      <div class="module-progress"><div class="module-progress-bar" style="background:#ffd32a;" data-w="60"></div></div>
+    </a>
+  </div>
+</section>
+
+<!-- ── FONDAMENTAUX CIA ───────────────────────────── -->
+<section id="fondamentaux">
+  <div class="section-tag">Le cœur de la cybersécurité</div>
+  <h2 class="section-title">La Triade <span>CIA</span></h2>
+  <p class="section-sub">Tous tes profs ont commencé par là — et pour cause. La triade CIA est le fondement absolu de toute la cybersécurité. Voici pourquoi et comment.</p>
+
+  <div class="pillars-grid reveal">
+    <div class="pillar" style="color: #00ff88;" data-letter="C">
+      <div class="pillar-letter">C</div>
+      <div class="pillar-name">Confidentialité</div>
+      <div class="pillar-desc">Seules les personnes autorisées peuvent accéder aux données. On protège l'information contre les accès non autorisés en utilisant chiffrement, contrôle d'accès, et authentification.</div>
+      <div class="pillar-example">
+        🔑 Exemple : Tu chiffres ton message avec AES-256.
+        Seul celui qui a la clé peut le lire.
+        Attaque visée : Écoute clandestine (sniffing)
+      </div>
+    </div>
+    <div class="pillar" style="color: #74b9ff;" data-letter="I">
+      <div class="pillar-letter">I</div>
+      <div class="pillar-name">Intégrité</div>
+      <div class="pillar-desc">Les données ne sont pas altérées sans autorisation — ni en transit, ni en stockage. On garantit que les données sont exactes et complètes avec des fonctions de hachage (SHA-256, MD5).</div>
+      <div class="pillar-example">
+        🔍 Exemple : Tu télécharges un fichier.
+        Tu calcules son SHA-256 et tu compares.
+        Attaque visée : Man-in-the-Middle (MITM)
+      </div>
+    </div>
+    <div class="pillar" style="color: #ff9f43;" data-letter="A">
+      <div class="pillar-letter">A</div>
+      <div class="pillar-name">Disponibilité</div>
+      <div class="pillar-desc">Les systèmes et données sont accessibles quand les utilisateurs autorisés en ont besoin. On se protège contre les pannes, les attaques DDoS et les catastrophes naturelles.</div>
+      <div class="pillar-example">
+        ⚡ Exemple : Un DDoS inonde ton serveur
+        de millions de requêtes → il s'effondre.
+        Attaque visée : DDoS, ransomware
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top: 40px;" class="reveal">
+    <div class="section-tag">Au-delà de CIA</div>
+    <h3 style="font-family: var(--font-head); font-size: 1.8rem; color: #fff; margin-bottom: 30px;">CIA + <span style="color: var(--green);">Extensions</span></h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px;">
+      <div style="background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 20px;">
+        <div style="font-family: var(--font-head); font-size: 1.1rem; color: var(--purple); margin-bottom: 8px;">🖊️ Non-Répudiation</div>
+        <div style="font-size: 0.85rem; color: var(--dim); line-height: 1.6;">L'expéditeur ne peut pas nier avoir envoyé un message. Réalisé via signatures numériques.</div>
+      </div>
+      <div style="background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 20px;">
+        <div style="font-family: var(--font-head); font-size: 1.1rem; color: var(--cyan); margin-bottom: 8px;">👤 Authentification</div>
+        <div style="font-size: 0.85rem; color: var(--dim); line-height: 1.6;">Prouver qu'on est bien qui on prétend être. MFA, certificats, biométrie.</div>
+      </div>
+      <div style="background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 20px;">
+        <div style="font-family: var(--font-head); font-size: 1.1rem; color: var(--orange); margin-bottom: 8px;">📋 Traçabilité (T)</div>
+        <div style="font-size: 0.85rem; color: var(--dim); line-height: 1.6;">CIA + T = CIAT. Savoir qui a fait quoi, quand et depuis où. Logs, audit trails, SIEM.</div>
+      </div>
+      <div style="background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 20px;">
+        <div style="font-family: var(--font-head); font-size: 1.1rem; color: var(--red); margin-bottom: 8px;">🔒 Moindre Privilège</div>
+        <div style="font-size: 0.85rem; color: var(--dim); line-height: 1.6;">Donner à chaque utilisateur uniquement les droits dont il a besoin — ni plus, ni moins.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── RÉSEAU SECTION ─────────────────────────────── -->
+<section id="reseau">
+  <div class="section-tag">Base réseau — essentiel</div>
+  <h2 class="section-title">Le modèle <span>OSI</span><br>en détail</h2>
+  <p class="section-sub">La base absolue que tu dois maîtriser. Sans comprendre OSI, rien d'autre ne fait sens en cybersécurité. Voici les 7 couches avec tout le détail.</p>
+
+  <div class="reveal">
+    <table class="osi-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Couche</th>
+          <th>Rôle</th>
+          <th>Protocoles clés</th>
+          <th>Équipement</th>
+          <th>Attaques typiques</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="layer-num">7</span></td>
+          <td><span class="layer-name">Application</span></td>
+          <td class="layer-role">Interface avec l'utilisateur. Ce que tu vois et utilises.</td>
+          <td class="layer-proto">HTTP, HTTPS, DNS, FTP, SSH, SMTP, DHCP</td>
+          <td class="layer-device">Proxy, WAF</td>
+          <td style="color: var(--red); font-size: 0.73rem;">XSS, SQLi, Phishing</td>
+        </tr>
+        <tr>
+          <td><span class="layer-num">6</span></td>
+          <td><span class="layer-name">Présentation</span></td>
+          <td class="layer-role">Chiffrement, compression, formatage des données.</td>
+          <td class="layer-proto">TLS/SSL, JPEG, MPEG, ASCII</td>
+          <td class="layer-device">—</td>
+          <td style="color: var(--red); font-size: 0.73rem;">SSL Stripping</td>
+        </tr>
+        <tr>
+          <td><span class="layer-num">5</span></td>
+          <td><span class="layer-name">Session</span></td>
+          <td class="layer-role">Gestion des sessions de communication entre apps.</td>
+          <td class="layer-proto">RPC, NetBIOS, PPTP</td>
+          <td class="layer-device">—</td>
+          <td style="color: var(--red); font-size: 0.73rem;">Session Hijacking</td>
+        </tr>
+        <tr>
+          <td><span class="layer-num">4</span></td>
+          <td><span class="layer-name">Transport</span></td>
+          <td class="layer-role">Segmentation, contrôle de flux, ports TCP/UDP.</td>
+          <td class="layer-proto">TCP, UDP, QUIC</td>
+          <td class="layer-device">Firewall L4</td>
+          <td style="color: var(--red); font-size: 0.73rem;">SYN Flood, Port Scan</td>
+        </tr>
+        <tr>
+          <td><span class="layer-num">3</span></td>
+          <td><span class="layer-name">Réseau</span></td>
+          <td class="layer-role">Routage des paquets entre réseaux. Adresses IP.</td>
+          <td class="layer-proto">IP, ICMP, ARP, OSPF, BGP</td>
+          <td class="layer-device">Routeur, Switch L3</td>
+          <td style="color: var(--red); font-size: 0.73rem;">IP Spoofing, Smurf</td>
+        </tr>
+        <tr>
+          <td><span class="layer-num">2</span></td>
+          <td><span class="layer-name">Liaison</span></td>
+          <td class="layer-role">Transfert de données entre nœuds adjacents. MAC.</td>
+          <td class="layer-proto">Ethernet, Wi-Fi, ARP, VLAN</td>
+          <td class="layer-device">Switch L2, Bridge</td>
+          <td style="color: var(--red); font-size: 0.73rem;">MAC Flooding, CAM Attack</td>
+        </tr>
+        <tr>
+          <td><span class="layer-num">1</span></td>
+          <td><span class="layer-name">Physique</span></td>
+          <td class="layer-role">Transmission de bits bruts sur le médium physique.</td>
+          <td class="layer-proto">Ethernet physique, Wi-Fi RF, Fibre</td>
+          <td class="layer-device">Hub, Répéteur, Câble</td>
+          <td style="color: var(--red); font-size: 0.73rem;">Écoute physique, Jamming</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ANIMATION TCP 3-WAY -->
+  <div class="anim-box reveal" style="margin-top: 50px;">
+    <div class="anim-box-title"><span class="dot"></span>Animation — TCP Three-Way Handshake</div>
+    <canvas id="tcpCanvas" width="800" height="200" style="width:100%; max-width:800px; display:block; margin: 0 auto;"></canvas>
+    <div style="text-align:center; margin-top: 10px;">
+      <button onclick="animateTCP()" class="btn-outline" style="font-size:0.8rem; padding: 8px 20px;">▶ Rejouer l'animation</button>
+    </div>
+  </div>
+
+  <!-- PROTOCOLES RÉSEAU -->
+  <div style="margin-top: 50px;" class="reveal">
+    <h3 style="font-family: var(--font-head); font-size: 1.8rem; color: #fff; margin-bottom: 30px;">Protocoles <span style="color: var(--green);">essentiels</span> à connaître</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px;">
+      <!-- Protocol cards -->
+      <div style="background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 18px; border-left: 3px solid var(--cyan);">
+        <div style="font-family: var(--font-mono); color: var(--cyan); font-size: 0.85rem; font-weight: 700; margin-bottom: 6px;">DHCP — Port 67/68</div>
+        <div style="font-size: 0.82rem; color: var(--dim); line-height: 1.6;">Dynamic Host Configuration Protocol. Assigne automatiquement une adresse IP à chaque machine qui se connecte au réseau. Sans DHCP, tu devrais configurer l'IP manuellement sur chaque PC.</div>
+      </div>
+      <div style="background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 18px; border-left: 3px solid var(--green);">
+        <div style="font-family: var(--font-mono); color: var(--green); font-size: 0.85rem; font-weight: 700; margin-bottom: 6px;">DNS — Port 53</div>
+        <div style="font-size: 0.82rem; color: var(--dim); line-height: 1.6;">Domain Name System. Traduit les noms de domaine (google.com) en adresses IP (142.250.74.68). Hiérarchie : Résolveur → Serveur Racine → TLD (.com) → Autoritaire.</div>
+      </div>
+      <div style="background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 18px; border-left: 3px solid var(--orange);">
+        <div style="font-family: var(--font-mono); color: var(--orange); font-size: 0.85rem; font-weight: 700; margin-bottom: 6px;">HTTP/HTTPS — Port 80/443</div>
+        <div style="font-size: 0.82rem; color: var(--dim); line-height: 1.6;">HyperText Transfer Protocol (Secure). HTTPS = HTTP + TLS/SSL. Le "S" garantit que la communication est chiffrée et que le serveur est authentifié.</div>
+      </div>
+      <div style="background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 18px; border-left: 3px solid var(--purple);">
+        <div style="font-family: var(--font-mono); color: var(--purple); font-size: 0.85rem; font-weight: 700; margin-bottom: 6px;">SSH — Port 22</div>
+        <div style="font-size: 0.82rem; color: var(--dim); line-height: 1.6;">Secure Shell. Connexion sécurisée et chiffrée à distance à un serveur. Remplace Telnet (port 23) qui envoyait tout en clair.</div>
+      </div>
+      <div style="background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 18px; border-left: 3px solid var(--red);">
+        <div style="font-family: var(--font-mono); color: var(--red); font-size: 0.85rem; font-weight: 700; margin-bottom: 6px;">NTP — Port 123</div>
+        <div style="font-size: 0.82rem; color: var(--dim); line-height: 1.6;">Network Time Protocol. Synchronise l'horloge de toutes les machines du réseau. Critique pour les logs de sécurité et les certificats TLS (qui ont une date d'expiration).</div>
+      </div>
+      <div style="background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 18px; border-left: 3px solid var(--yellow);">
+        <div style="font-family: var(--font-mono); color: var(--yellow); font-size: 0.85rem; font-weight: 700; margin-bottom: 6px;">SMTP/IMAP — Port 25/143</div>
+        <div style="font-size: 0.82rem; color: var(--dim); line-height: 1.6;">Protocoles email. SMTP envoie les mails, IMAP les reçoit et les synchronise. POP3 (port 110) télécharge sans synchroniser.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── QCM ────────────────────────────────────────── -->
+<section id="qcm">
+  <div class="section-tag">Entraînement</div>
+  <h2 class="section-title">QCM — <span>Teste tes</span><br>connaissances</h2>
+  <p class="section-sub">Questions sur tous les modules. Chaque bonne réponse est expliquée. Ton score est sauvegardé pour la session.</p>
+
+  <div class="qcm-container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 10px;">
+      <div style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--dim);">
+        Question <span id="qNum" style="color: var(--green);">1</span> / <span id="qTotal">10</span>
+      </div>
+      <div style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--dim);">
+        Score : <span id="scoreDisplay" style="color: var(--green);">0</span> / <span id="scoreTot">0</span>
+      </div>
+    </div>
+
+    <div id="qcm-area"></div>
+
+    <div class="qcm-nav">
+      <button onclick="prevQ()" class="btn-outline" style="font-size:0.8rem; padding: 9px 20px;">← Précédent</button>
+      <div style="flex:1; margin: 0 16px;">
+        <div class="qcm-progress">
+          <div class="qcm-progress-fill" id="qProgress" style="width:10%"></div>
+        </div>
+      </div>
+      <button onclick="nextQ()" class="btn-outline" style="font-size:0.8rem; padding: 9px 20px;">Suivant →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ── GLOSSAIRE ──────────────────────────────────── -->
+<section id="glossaire">
+  <div class="section-tag">Référence</div>
+  <h2 class="section-title">Glossaire <span>Complet</span></h2>
+  <p class="section-sub">Tous les acronymes et termes que tes profs ont utilisés — expliqués clairement. Cherche n'importe quel terme.</p>
+
+  <input class="gloss-search reveal" type="text" id="glossSearch" placeholder="🔍  Rechercher un terme... (ex: CIA, IDS, CVE...)" oninput="filterGloss(this.value)">
+
+  <div class="gloss-grid reveal" id="glossGrid"></div>
+</section>
+
+<!-- ── RESOURCES ──────────────────────────────────── -->
+<section id="ressources">
+  <div class="section-tag">Pour aller plus loin</div>
+  <h2 class="section-title">Ressources <span>YouTube</span><br>& Pratique</h2>
+  <p class="section-sub">Les meilleures chaînes avec schémas 3D et animations. Exactement ce que tu cherchais.</p>
+
+  <div class="resources-grid reveal">
+    <div class="resource-card" style="--accent: #ff0000;">
+      <div class="resource-type">YouTube — Réseaux</div>
+      <div class="resource-name">NetworkChuck</div>
+      <div class="resource-desc">Explications réseau avec animations vivantes, schémas 3D. Parfait pour les bases réseau que tu cherches. En anglais simple.</div>
+      <div class="resource-link">youtube.com/@NetworkChuck</div>
+    </div>
+    <div class="resource-card" style="--accent: #ff0000;">
+      <div class="resource-type">YouTube — Cybersécurité FR</div>
+      <div class="resource-name">Processus Technique</div>
+      <div class="resource-desc">Chaîne française avec schémas animés sur la cybersécurité, les protocoles réseau, les attaques et les défenses.</div>
+      <div class="resource-link">youtube.com/@ProcessusTechnique</div>
+    </div>
+    <div class="resource-card" style="--accent: #ff0000;">
+      <div class="resource-type">YouTube — Hacking éthique</div>
+      <div class="resource-name">John Hammond</div>
+      <div class="resource-desc">CTF, malware analysis, hacking éthique. Montre exactement comment les attaques fonctionnent en pratique.</div>
+      <div class="resource-link">youtube.com/@_JohnHammond</div>
+    </div>
+    <div class="resource-card" style="--accent: #00bcd4;">
+      <div class="resource-type">Pratique interactive</div>
+      <div class="resource-name">TryHackMe</div>
+      <div class="resource-desc">Plateforme d'apprentissage pratique en cybersécurité. Environnements virtuels, parcours structurés du débutant à l'expert. Parcours "Pre-Security" recommandé.</div>
+      <div class="resource-link">tryhackme.com</div>
+    </div>
+    <div class="resource-card" style="--accent: #ff6b35;">
+      <div class="resource-type">Certifications</div>
+      <div class="resource-name">Cisco Skills for All</div>
+      <div class="resource-desc">Cours gratuits Cisco avec les badges Credly mentionnés par ton prof. Junior Cybersecurity Analyst est là.</div>
+      <div class="resource-link">skillsforall.com</div>
+    </div>
+    <div class="resource-card" style="--accent: #a29bfe;">
+      <div class="resource-type">Base de données</div>
+      <div class="resource-name">CVE.org / NVD</div>
+      <div class="resource-desc">La base officielle des vulnérabilités. Chaque CVE a une entrée avec score CVSS, description, patches. À visiter absolument.</div>
+      <div class="resource-link">cve.org — nvd.nist.gov</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ─────────────────────────────────────── -->
+<footer>
+  <div class="footer-logo">CyberAcademy</div>
+  <div class="footer-text">Génie Informatique — 4ème Année &nbsp;|&nbsp; Cryptographie · Intrusions · VPN · Incidents · Mobile · Blockchain</div>
+</footer>
+
+</div><!-- /wrapper -->
+
+<script>
+// ── CURSOR ──────────────────────────────────────────
+const cursor = document.getElementById('cursor');
+const ring   = document.getElementById('cursorRing');
+let mx = 0, my = 0, rx = 0, ry = 0;
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cursor.style.left = mx + 'px';
+  cursor.style.top  = my + 'px';
+});
+setInterval(() => {
+  rx += (mx - rx) * 0.12;
+  ry += (my - ry) * 0.12;
+  ring.style.left = rx + 'px';
+  ring.style.top  = ry + 'px';
+}, 16);
+
+// ── MATRIX ──────────────────────────────────────────
+const canvas = document.getElementById('matrix-bg');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+const cols = Math.floor(canvas.width / 16);
+const drops = Array(cols).fill(1);
+function drawMatrix() {
+  ctx.fillStyle = 'rgba(2,4,8,0.05)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#00ff88';
+  ctx.font = '14px Share Tech Mono';
+  drops.forEach((y, i) => {
+    const char = String.fromCharCode(0x30a0 + Math.random() * 96);
+    ctx.fillText(char, i * 16, y * 16);
+    if (y * 16 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+    drops[i]++;
+  });
+}
+setInterval(drawMatrix, 50);
+window.addEventListener('resize', () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+
+// ── SCROLL REVEAL ────────────────────────────────────
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      if (e.target.querySelectorAll('.module-progress-bar').length) {
+        e.target.querySelectorAll('.module-progress-bar').forEach(bar => {
+          bar.style.width = bar.dataset.w + '%';
+        });
+      }
+    }
+  });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// ── TCP ANIMATION ────────────────────────────────────
+function animateTCP() {
+  const c = document.getElementById('tcpCanvas');
+  if (!c) return;
+  const x = c.getContext('2d');
+  const W = c.width, H = c.height;
+  const L = 120, R = W - 120;
+  const steps = [
+    { from: L, to: R, label: 'SYN', color: '#ff9f43', y: 60, t: 0 },
+    { from: R, to: L, label: 'SYN-ACK', color: '#00ff88', y: 110, t: 60 },
+    { from: L, to: R, label: 'ACK', color: '#74b9ff', y: 160, t: 120 },
+  ];
+  let frame = 0;
+
+  x.clearRect(0, 0, W, H);
+  // Draw actors
+  function drawActors() {
+    x.fillStyle = 'rgba(0,255,136,0.15)';
+    x.strokeStyle = '#00ff88';
+    x.lineWidth = 1;
+    x.beginPath(); x.rect(L - 50, 10, 80, 35); x.fill(); x.stroke();
+    x.fillStyle = 'rgba(116,185,255,0.15)';
+    x.strokeStyle = '#74b9ff';
+    x.beginPath(); x.rect(R - 30, 10, 80, 35); x.fill(); x.stroke();
+    x.font = '13px Share Tech Mono';
+    x.fillStyle = '#00ff88'; x.textAlign = 'center';
+    x.fillText('TON PC', L - 10, 33);
+    x.fillStyle = '#74b9ff';
+    x.fillText('SERVEUR', R + 10, 33);
+    // vertical lines
+    x.strokeStyle = 'rgba(255,255,255,0.1)';
+    x.setLineDash([4, 4]);
+    x.beginPath(); x.moveTo(L - 10, 45); x.lineTo(L - 10, H); x.stroke();
+    x.beginPath(); x.moveTo(R + 10, 45); x.lineTo(R + 10, H); x.stroke();
+    x.setLineDash([]);
+  }
+
+  function animFrame() {
+    x.clearRect(0, 0, W, H);
+    drawActors();
+    steps.forEach(s => {
+      if (frame < s.t) return;
+      const prog = Math.min((frame - s.t) / 50, 1);
+      const cx = s.from + (s.to - s.from) * prog;
+      // line
+      x.strokeStyle = s.color;
+      x.lineWidth = 2;
+      x.beginPath();
+      x.moveTo(s.from + (s.from < s.to ? -10 : 10), s.y);
+      x.lineTo(cx, s.y);
+      x.stroke();
+      // arrowhead
+      if (prog >= 1) {
+        const dir = s.to > s.from ? 1 : -1;
+        x.fillStyle = s.color;
+        x.beginPath();
+        x.moveTo(s.to + dir * 10, s.y);
+        x.lineTo(s.to - dir * 8, s.y - 6);
+        x.lineTo(s.to - dir * 8, s.y + 6);
+        x.closePath(); x.fill();
+      }
+      // label
+      const mid = (s.from + s.to) / 2;
+      x.fillStyle = s.color;
+      x.font = 'bold 13px Share Tech Mono';
+      x.textAlign = 'center';
+      x.fillText(s.label, mid, s.y - 8);
+    });
+    frame++;
+    if (frame < 200) requestAnimationFrame(animFrame);
+  }
+  animFrame();
+}
+animateTCP();
+
+// ── QCM DATA ──────────────────────────────────────────
+const qcmData = [
+  {
+    q: "Que signifie l'acronyme CIA en cybersécurité ?",
+    opts: ["Central Intelligence Agency", "Confidentialité, Intégrité, Availability (Disponibilité)", "Chiffrement, Intégration, Authentification", "Contrôle, Identification, Autorisation"],
+    correct: 1,
+    diff: "easy",
+    expl: "<strong>CIA = Confidentialité, Intégrité, Disponibilité (Availability)</strong>. C'est la triade fondamentale de la cybersécurité. Tous tes profs ont commencé par là car c'est le socle de toute politique de sécurité."
+  },
+  {
+    q: "Quelle est la différence entre un IDS et un IPS ?",
+    opts: ["L'IDS chiffre les données, l'IPS les déchiffre", "L'IDS détecte les intrusions et alerte, l'IPS détecte ET bloque activement", "L'IDS est matériel, l'IPS est logiciel", "Il n'y a aucune différence"],
+    correct: 1,
+    diff: "med",
+    expl: "<strong>IDS (Intrusion Detection System)</strong> : détecte et alerte — il est passif. <strong>IPS (Intrusion Prevention System)</strong> : détecte ET bloque en temps réel — il est actif. L'IPS est placé en ligne dans le flux réseau."
+  },
+  {
+    q: "Qu'est-ce qu'une vulnérabilité Zero-Day ?",
+    opts: ["Une faille découverte et corrigée le même jour", "Une faille connue depuis zéro jour par le vendeur — pas de patch disponible", "Une attaque qui dure 0 secondes", "Un virus qui s'active à minuit"],
+    correct: 1,
+    diff: "med",
+    expl: "Une <strong>Zero-Day</strong> est une faille inconnue du fabricant du logiciel. 'Zéro jour' = le vendeur a eu 0 jours pour la corriger. Les hackers l'exploitent avant qu'un patch existe. C'est l'arme la plus dangereuse."
+  },
+  {
+    q: "Dans le modèle OSI, à quelle couche opère un switch standard (niveau 2) ?",
+    opts: ["Couche 1 — Physique", "Couche 2 — Liaison de données", "Couche 3 — Réseau", "Couche 7 — Application"],
+    correct: 1,
+    diff: "easy",
+    expl: "Un <strong>switch standard (L2)</strong> opère à la couche 2 (Liaison). Il utilise les adresses MAC pour transmettre les trames. Un switch L3 (fédérateur) fonctionne aussi en couche 3 comme un routeur, mais sans protocoles de routage dynamique."
+  },
+  {
+    q: "Quelle est la différence entre chiffrer et crypter selon le cours ?",
+    opts: ["Ce sont des synonymes", "Chiffrer/déchiffrer est légal (avec clé), crypter/décrypter est illégal (forçage sans clé)", "Chiffrer est plus sécurisé que crypter", "Crypter utilise une clé symétrique, chiffrer une clé asymétrique"],
+    correct: 1,
+    diff: "easy",
+    expl: "<strong>Chiffrer</strong> = transformer avec une clé connue (légal, intentionnel). <strong>Déchiffrer</strong> = inverser avec la clé (légal). <strong>Crypter</strong> = dans le sens courant, forcer le déchiffrement sans clé (hacking). <strong>Décrypter</strong> = trouver le message sans la clé."
+  },
+  {
+    q: "Que signifie CVE et à quoi ça sert ?",
+    opts: ["Common Virus Encyclopedia", "Common Vulnerability Exposure — identifiant unique de chaque vulnérabilité connue", "Cyber Vulnerability Engine", "Certified Vulnerability Expert"],
+    correct: 1,
+    diff: "easy",
+    expl: "<strong>CVE = Common Vulnerability Exposure</strong>. C'est un système d'identification standardisé des failles de sécurité. Format : CVE-ANNÉE-NUMÉRO (ex: CVE-2021-44228 = Log4Shell). La base NVD (National Vulnerability Database) enrichit les CVE avec scores CVSS."
+  },
+  {
+    q: "Qu'est-ce que le CVSS ?",
+    opts: ["Un protocole de chiffrement", "Un score de 0 à 10 qui mesure la gravité d'une vulnérabilité", "Un antivirus", "Common Vulnerability Scoring System — un standard de notation"],
+    correct: 3,
+    diff: "med",
+    expl: "<strong>CVSS = Common Vulnerability Scoring System</strong>. Score de 0 à 10 : 0-3.9 = faible, 4-6.9 = moyen, 7-8.9 = élevé, 9-10 = critique. Il prend en compte : vecteur d'attaque, complexité, privilèges requis, impact sur CIA."
+  },
+  {
+    q: "Dans le chiffrement asymétrique, comment envoyer un message chiffré à Alice ?",
+    opts: ["Chiffrer avec ta clé privée", "Chiffrer avec la clé publique d'Alice", "Chiffrer avec la clé privée d'Alice", "Chiffrer avec ta clé publique"],
+    correct: 1,
+    diff: "med",
+    expl: "En <strong>asymétrique</strong> : tu chiffres avec la <strong>clé publique du destinataire</strong> (Alice). Seul Alice peut déchiffrer avec sa <strong>clé privée</strong>. Pour signer, c'est l'inverse : tu signes avec ta clé privée, tout le monde vérifie avec ta clé publique."
+  },
+  {
+    q: "Quelle est la différence entre une intrusion et un incident de sécurité ?",
+    opts: ["Ce sont des synonymes", "L'intrusion = la tentative d'accès non autorisé. L'incident = la conséquence réalisée.", "L'intrusion est plus grave que l'incident", "L'incident est une tentative échouée"],
+    correct: 1,
+    diff: "easy",
+    expl: "Comme ton prof l'a bien dit : <strong>Intrusion = tentative</strong> (quelqu'un essaie d'entrer). <strong>Incident = conséquence</strong> (il est entré et a causé des dégâts). L'IDS détecte les intrusions avant qu'elles deviennent des incidents."
+  },
+  {
+    q: "Qu'est-ce que la DMZ en sécurité réseau ?",
+    opts: ["Zone démilitarisée : réseau intermédiaire entre Internet et le réseau interne", "Un type de pare-feu", "Une attaque DDoS", "Un protocole de chiffrement"],
+    correct: 0,
+    diff: "med",
+    expl: "<strong>DMZ = DeMilitarized Zone</strong>. C'est un sous-réseau isolé entre Internet et le réseau interne. On y place les serveurs publics (web, mail, DNS). Si un serveur DMZ est compromis, l'attaquant n'a pas directement accès au réseau interne."
+  }
+];
+
+let currentQ = 0, score = 0, answered = [];
+
+function renderQCM() {
+  const area = document.getElementById('qcm-area');
+  const q = qcmData[currentQ];
+  document.getElementById('qNum').textContent = currentQ + 1;
+  document.getElementById('qTotal').textContent = qcmData.length;
+  document.getElementById('qProgress').style.width = ((currentQ + 1) / qcmData.length * 100) + '%';
+
+  area.innerHTML = `
+    <div class="qcm-card active">
+      <div class="qcm-header">
+        <div class="qcm-num">QUESTION ${String(currentQ + 1).padStart(2, '0')} / ${qcmData.length}</div>
+        <div class="qcm-difficulty diff-${q.diff === 'easy' ? 'easy' : q.diff === 'med' ? 'med' : 'hard'}">${q.diff === 'easy' ? 'FACILE' : q.diff === 'med' ? 'MOYEN' : 'DIFFICILE'}</div>
+      </div>
+      <div class="qcm-question">${q.q}</div>
+      <div class="qcm-options">
+        ${q.opts.map((o, i) => `
+          <div class="qcm-option ${answered[currentQ] !== undefined ? (i === q.correct ? 'correct' : answered[currentQ] === i ? 'wrong' : '') : ''} ${answered[currentQ] !== undefined ? 'locked' : ''}"
+               onclick="answerQ(${i})"
+               style="${answered[currentQ] !== undefined ? 'cursor:default' : ''}">
+            <span class="option-letter">${['A','B','C','D'][i]}</span>
+            ${o}
+          </div>
+        `).join('')}
+      </div>
+      <div class="qcm-explanation ${answered[currentQ] !== undefined ? 'show' : ''}">
+        ${answered[currentQ] !== undefined ? (answered[currentQ] === q.correct ? '✅ Correct ! ' : '❌ Incorrect. ') + q.expl : ''}
+      </div>
+    </div>
+  `;
+}
+
+function answerQ(i) {
+  if (answered[currentQ] !== undefined) return;
+  answered[currentQ] = i;
+  if (i === qcmData[currentQ].correct) score++;
+  document.getElementById('scoreDisplay').textContent = score;
+  document.getElementById('scoreTot').textContent = answered.filter(a => a !== undefined).length;
+  renderQCM();
+}
+
+function nextQ() {
+  if (currentQ < qcmData.length - 1) { currentQ++; renderQCM(); }
+}
+function prevQ() {
+  if (currentQ > 0) { currentQ--; renderQCM(); }
+}
+
+renderQCM();
+
+// ── GLOSSAIRE ────────────────────────────────────────
+const glossData = [
+  { term: 'CIA', full: 'Confidentiality, Integrity, Availability', def: 'La triade fondamentale de la cybersécurité. Toute politique de sécurité doit garantir ces 3 propriétés.', mod: 'Fondamentaux' },
+  { term: 'IDS', full: 'Intrusion Detection System', def: 'Système qui surveille le trafic réseau et alerte en cas d\'activité suspecte. Passif — ne bloque pas.', mod: 'Intrusion' },
+  { term: 'IPS', full: 'Intrusion Prevention System', def: 'Comme l\'IDS mais bloque activement les menaces en temps réel. Placé en ligne dans le flux.', mod: 'Intrusion' },
+  { term: 'CVE', full: 'Common Vulnerability Exposure', def: 'Identifiant unique attribué à chaque vulnérabilité connue. Format CVE-ANNÉE-NUMÉRO.', mod: 'Intrusion' },
+  { term: 'CVSS', full: 'Common Vulnerability Scoring System', def: 'Score de 0 à 10 mesurant la sévérité d\'une vulnérabilité. 9-10 = critique.', mod: 'Intrusion' },
+  { term: 'DMZ', full: 'DeMilitarized Zone', def: 'Réseau intermédiaire entre Internet et le réseau interne. Héberge les serveurs exposés au public.', mod: 'Réseau' },
+  { term: 'VLAN', full: 'Virtual Local Area Network', def: 'Segmentation logique d\'un réseau physique. Permet d\'isoler des groupes de machines.', mod: 'Réseau' },
+  { term: 'ACL', full: 'Access Control List', def: 'Règles de filtrage appliquées sur les routeurs ou pare-feux. Définit qui peut accéder à quoi.', mod: 'Réseau' },
+  { term: 'VPN', full: 'Virtual Private Network', def: 'Tunnel chiffré entre deux points sur Internet. Garantit confidentialité et intégrité des données en transit.', mod: 'VPN' },
+  { term: 'ZTNA', full: 'Zero Trust Network Access', def: 'Principe : ne jamais faire confiance, toujours vérifier. Chaque accès est authentifié et autorisé explicitement.', mod: 'VPN' },
+  { term: 'TLS', full: 'Transport Layer Security', def: 'Protocole de chiffrement pour sécuriser les communications réseau. Successeur de SSL. Utilisé par HTTPS.', mod: 'Crypto' },
+  { term: 'MFA', full: 'Multi-Factor Authentication', def: 'Authentification avec 2+ facteurs : quelque chose que tu sais (mdp), as (token), es (biométrie).', mod: 'Fondamentaux' },
+  { term: 'OTP', full: 'One-Time Password', def: 'Mot de passe à usage unique, valide pour une seule session. Ex: code SMS envoyé par ta banque.', mod: 'Crypto' },
+  { term: 'SHA-256', full: 'Secure Hash Algorithm 256-bit', def: 'Fonction de hachage produisant une empreinte de 256 bits. Irréversible et déterministe.', mod: 'Blockchain' },
+  { term: 'MD5', full: 'Message Digest 5', def: 'Ancienne fonction de hachage (128 bits). Considérée CASSÉE pour la sécurité — collisions trouvées.', mod: 'Blockchain' },
+  { term: 'MITM', full: 'Man-In-The-Middle', def: 'Attaque où l\'attaquant s\'intercale entre deux parties communicantes pour lire ou modifier les échanges.', mod: 'Intrusion' },
+  { term: 'DDoS', full: 'Distributed Denial of Service', def: 'Attaque qui inonde un serveur de requêtes depuis des milliers de machines (zombies/botnet) pour le saturer.', mod: 'Mobile/Web' },
+  { term: 'WAF', full: 'Web Application Firewall', def: 'Pare-feu spécialisé pour les applications web. Protège contre XSS, SQLi, CSRF au niveau couche 7.', mod: 'Intrusion' },
+  { term: 'SOC', full: 'Security Operations Center', def: 'Centre opérationnel de sécurité. Équipe qui surveille 24h/24 les systèmes d\'information de l\'entreprise.', mod: 'Incidents' },
+  { term: 'SIEM', full: 'Security Information and Event Management', def: 'Système centralisant les logs de toute l\'infrastructure pour détecter des incidents par corrélation.', mod: 'Incidents' },
+  { term: 'NTP', full: 'Network Time Protocol', def: 'Protocole de synchronisation d\'horloge réseau. Critique pour la validité des logs et certificats TLS.', mod: 'Réseau' },
+  { term: 'DHCP', full: 'Dynamic Host Configuration Protocol', def: 'Assigne automatiquement une IP, masque, passerelle et DNS à chaque machine qui se connecte au réseau.', mod: 'Réseau' },
+  { term: 'APK', full: 'Android Package Kit', def: 'Format de fichier d\'application Android. Peut contenir du code malveillant si téléchargé hors du Play Store.', mod: 'Mobile' },
+  { term: 'ADB', full: 'Android Debug Bridge', def: 'Outil de débogage Android permettant une communication entre un PC et un appareil Android.', mod: 'Mobile' },
+  { term: 'QoS', full: 'Quality of Service', def: 'Ensemble de mécanismes priorisant certains types de trafic réseau pour garantir les performances (VoIP, vidéo).', mod: 'Supervision' },
+  { term: 'UTM', full: 'Unified Threat Management', def: 'Solution de sécurité unifiée combinant firewall, IPS, antivirus, VPN, filtrage web en un seul équipement.', mod: 'Intrusion' },
+  { term: 'DGSSI', full: 'Direction Générale de la Sécurité des Systèmes d\'Information', def: 'Autorité nationale marocaine de cybersécurité. Supervise la protection des systèmes d\'information critiques.', mod: 'Juridique' },
+  { term: 'EDR', full: 'Endpoint Detection and Response', def: 'Solution de sécurité surveillant les terminaux (PC, serveurs) pour détecter et répondre aux menaces avancées.', mod: 'Intrusion' },
+  { term: 'XSS', full: 'Cross-Site Scripting', def: 'Injection de code JavaScript malveillant dans une page web pour voler des sessions ou des données.', mod: 'Mobile/Web' },
+  { term: 'SQLi', full: 'SQL Injection', def: 'Injection de commandes SQL dans un formulaire pour manipuler la base de données (vol, suppression de données).', mod: 'Mobile/Web' },
+  { term: 'IoT', full: 'Internet of Things', def: 'Objets connectés à Internet (frigos, caméras, capteurs). Surface d\'attaque massive car souvent peu sécurisés.', mod: 'Fondamentaux' },
+  { term: 'BYOD', full: 'Bring Your Own Device', def: 'Politique permettant aux employés d\'utiliser leurs appareils personnels au travail. Risque sécurité important.', mod: 'Supervision' },
+  { term: 'GRC', full: 'Governance, Risk & Compliance', def: 'Cadre de gestion des risques et de conformité réglementaire d\'une organisation.', mod: 'Fondamentaux' },
+  { term: 'PKI', full: 'Public Key Infrastructure', def: 'Infrastructure de gestion des certificats numériques et des clés publiques/privées. Base d\'HTTPS.', mod: 'Crypto' },
+  { term: 'CAM', full: 'Content Addressable Memory', def: 'Table du switch associant adresses MAC aux ports. Attaque CAM flooding = remplir la table pour forcer le switch en mode hub.', mod: 'Réseau' },
+  { term: 'MITRE', full: 'MITRE ATT&CK Framework', def: 'Base de connaissance mondiale des tactiques et techniques d\'attaque. Référence absolue en cybersécurité offensive/défensive.', mod: 'Intrusion' },
+];
+
+const glossGrid = document.getElementById('glossGrid');
+function renderGloss(data) {
+  glossGrid.innerHTML = data.map(g => `
+    <div class="gloss-item">
+      <div class="gloss-term">${g.term}</div>
+      <div class="gloss-full">${g.full}</div>
+      <div class="gloss-def">${g.def}</div>
+      <span class="gloss-module">${g.mod}</span>
+    </div>
+  `).join('');
+}
+renderGloss(glossData);
+
+function filterGloss(val) {
+  const v = val.toLowerCase();
+  const filtered = glossData.filter(g =>
+    g.term.toLowerCase().includes(v) ||
+    g.full.toLowerCase().includes(v) ||
+    g.def.toLowerCase().includes(v) ||
+    g.mod.toLowerCase().includes(v)
+  );
+  renderGloss(filtered);
+}
+
+// ── SCROLL PROGRESS ──────────────────────────────────
+window.addEventListener('scroll', () => {
+  const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;
+});
+</script>
+</body>
+</html>

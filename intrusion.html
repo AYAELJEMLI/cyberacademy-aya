@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestion des Intrusions — CyberAcademy</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700;800&display=swap');
+:root{--bg:#020408;--bg2:#060d14;--panel:rgba(255,56,96,0.04);--border:rgba(255,56,96,0.2);--green:#00ff88;--cyan:#00e5ff;--red:#ff3860;--orange:#ff9f43;--yellow:#ffd32a;--purple:#a29bfe;--blue:#74b9ff;--text:#c8d6e5;--dim:rgba(200,214,229,0.5);--font-main:'Exo 2',sans-serif;--font-mono:'Share Tech Mono',monospace;--font-head:'Rajdhani',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--font-main);overflow-x:hidden;}
+body::after{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);pointer-events:none;z-index:1;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(2,4,8,0.9);border-bottom:1px solid rgba(255,56,96,0.2);backdrop-filter:blur(12px);padding:0 40px;height:60px;display:flex;align-items:center;justify-content:space-between;}
+.nav-logo{font-family:var(--font-head);font-size:1.4rem;font-weight:700;color:var(--red);letter-spacing:3px;text-decoration:none;}
+.nav-logo span{color:var(--text);}
+.nav-back{font-family:var(--font-mono);font-size:0.75rem;color:var(--dim);text-decoration:none;border:1px solid rgba(255,56,96,0.3);padding:6px 16px;border-radius:3px;transition:all 0.2s;}
+.nav-back:hover{color:var(--red);border-color:var(--red);}
+.wrapper{position:relative;z-index:2;padding-top:60px;}
+section{padding:80px 80px;}
+.section-tag{font-family:var(--font-mono);font-size:0.65rem;color:var(--red);letter-spacing:4px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:10px;}
+.section-tag::before{content:'//';color:var(--dim);}
+h1,h2{font-family:var(--font-head);font-weight:700;letter-spacing:1px;color:#fff;line-height:1.1;}
+h1{font-size:clamp(2.5rem,5vw,4.5rem);margin-bottom:16px;}
+h2{font-size:2rem;margin-bottom:20px;}
+h2 span{color:var(--red);}
+.lead{color:var(--dim);font-size:1rem;line-height:1.7;max-width:650px;margin-bottom:50px;}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:28px;margin-bottom:20px;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.code-block{background:#000;border:1px solid rgba(255,255,255,0.07);border-radius:6px;padding:20px 24px;font-family:var(--font-mono);font-size:0.82rem;line-height:1.9;overflow-x:auto;margin:16px 0;}
+.cmt{color:#455a64;font-style:italic;}.hi{color:#ff3860;font-weight:700;}.val{color:#81c784;}.kw{color:#a29bfe;}.ok{color:var(--green);}
+.tag{display:inline-block;font-family:var(--font-mono);font-size:0.65rem;border:1px solid currentColor;padding:2px 8px;border-radius:2px;margin:3px;}
+.reveal{opacity:0;transform:translateY(20px);transition:opacity 0.5s,transform 0.5s;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+.btn-sm{background:transparent;color:var(--red);border:1px solid var(--red);font-family:var(--font-mono);font-size:0.75rem;padding:7px 16px;border-radius:3px;cursor:pointer;transition:all 0.2s;}
+.btn-sm:hover{background:rgba(255,56,96,0.1);}
+
+/* Timeline */
+.timeline{position:relative;padding-left:40px;margin:30px 0;}
+.timeline::before{content:'';position:absolute;left:12px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,var(--red),var(--orange),var(--green));}
+.tl-item{position:relative;margin-bottom:30px;}
+.tl-dot{position:absolute;left:-34px;top:4px;width:14px;height:14px;border-radius:50%;border:2px solid;box-shadow:0 0 10px currentColor;}
+.tl-label{font-family:var(--font-mono);font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;}
+.tl-title{font-family:var(--font-head);font-size:1.05rem;font-weight:700;color:#fff;margin-bottom:6px;}
+.tl-desc{font-size:0.84rem;color:var(--dim);line-height:1.65;}
+
+/* Attack types grid */
+.attack-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}
+.attack-card{background:rgba(0,0,0,0.4);border:1px solid rgba(255,56,96,0.15);border-radius:6px;padding:18px;border-left:3px solid;}
+.attack-icon{font-size:1.5rem;margin-bottom:8px;display:block;}
+.attack-name{font-family:var(--font-head);font-size:1rem;color:#fff;margin-bottom:6px;}
+.attack-desc{font-size:0.82rem;color:var(--dim);line-height:1.6;}
+.attack-mitigation{margin-top:10px;font-size:0.75rem;padding:6px 10px;background:rgba(0,255,136,0.07);border-radius:3px;color:var(--green);}
+
+/* CVSS meter */
+.cvss-meter{background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:6px;padding:20px;margin-top:14px;}
+.cvss-bar{height:20px;border-radius:3px;background:linear-gradient(to right,#00ff88 0%,#ffd32a 40%,#ff9f43 70%,#ff3860 100%);position:relative;margin:12px 0;}
+.cvss-needle{position:absolute;top:-4px;width:4px;height:28px;background:#fff;border-radius:2px;transform:translateX(-50%);transition:left 0.5s ease;box-shadow:0 0 8px rgba(255,255,255,0.5);}
+.cvss-labels{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:0.65rem;color:var(--dim);}
+.cvss-score{font-family:var(--font-head);font-size:2.5rem;font-weight:700;text-align:center;margin-bottom:6px;}
+.cvss-input{-webkit-appearance:none;appearance:none;width:100%;height:4px;background:rgba(255,255,255,0.1);border-radius:2px;outline:none;margin:8px 0;}
+.cvss-input::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:16px;height:16px;border-radius:50%;background:var(--red);cursor:pointer;}
+
+/* Zones diagram */
+.zones{display:flex;flex-direction:column;gap:10px;max-width:700px;}
+.zone{border-radius:6px;padding:14px 20px;border:1px solid;display:flex;align-items:center;gap:14px;transition:all 0.2s;}
+.zone:hover{transform:translateX(4px);}
+.zone-num{font-family:var(--font-mono);font-size:0.75rem;width:24px;flex-shrink:0;text-align:center;}
+.zone-info{flex:1;}
+.zone-name{font-family:var(--font-head);font-size:1rem;font-weight:700;margin-bottom:3px;}
+.zone-desc{font-size:0.8rem;color:var(--dim);}
+.zone-icon{font-size:1.5rem;}
+
+@media(max-width:900px){section{padding:60px 24px;}.two-col{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">Cyber<span>Academy</span></a>
+  <a href="index.html" class="nav-back">← Retour accueil</a>
+</nav>
+<div class="wrapper">
+
+<!-- HERO -->
+<section style="background:var(--bg2);min-height:45vh;display:flex;flex-direction:column;justify-content:center;">
+  <div class="section-tag">Module 02</div>
+  <h1>Gestion des <span style="color:var(--red);">Intrusions</span></h1>
+  <p class="lead">Détecter, analyser et répondre aux tentatives d'attaques. IDS, IPS, CVE, Zero-Day, pare-feux, DMZ — tout ce qu'il faut pour défendre une infrastructure.</p>
+</section>
+
+<!-- INTRUSION VS INCIDENT -->
+<section>
+  <div class="section-tag">Terminologie essentielle</div>
+  <h2>Intrusion vs <span>Incident</span></h2>
+  <div class="two-col reveal">
+    <div class="card" style="border-left:3px solid var(--orange);">
+      <div style="font-family:var(--font-head);font-size:1.2rem;color:var(--orange);margin-bottom:10px;">🚪 Intrusion = La tentative</div>
+      <p style="font-size:0.88rem;color:var(--dim);line-height:1.65;">Quelqu'un essaie d'accéder sans autorisation. Il n'a pas encore réussi. On peut encore le bloquer. L'IDS/IPS surveille et détecte ces tentatives.</p>
+      <div class="code-block">
+        <span class="cmt">Exemples d'intrusion :</span><br>
+        → Scan de ports (nmap)<br>
+        → Tentative de connexion SSH par force brute<br>
+        → Envoi d'un payload malveillant<br>
+        → Exploit non réussi
+      </div>
+    </div>
+    <div class="card" style="border-left:3px solid var(--red);">
+      <div style="font-family:var(--font-head);font-size:1.2rem;color:var(--red);margin-bottom:10px;">💥 Incident = La conséquence</div>
+      <p style="font-size:0.88rem;color:var(--dim);line-height:1.65;">L'attaquant a réussi. Il y a eu un impact sur la confidentialité, l'intégrité ou la disponibilité. On entre en mode réponse aux incidents.</p>
+      <div class="code-block">
+        <span class="cmt">Exemples d'incident :</span><br>
+        → Serveur compromis<br>
+        → Fuite de données<br>
+        → Ransomware déployé<br>
+        → Site web défiguré
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CYCLE DE VIE D'UNE VULNÉRABILITÉ -->
+<section style="background:var(--bg2);">
+  <div class="section-tag">Concept fondamental</div>
+  <h2>Cycle de vie d'une <span>Vulnérabilité</span></h2>
+  <p style="color:var(--dim);font-size:0.9rem;line-height:1.65;max-width:600px;margin-bottom:40px;">Ce schéma explique comment une faille naît, est découverte, exploitée et finalement corrigée. Ton prof a dit que c'était TRÈS important.</p>
+
+  <div class="timeline reveal">
+    <div class="tl-item">
+      <div class="tl-dot" style="color:var(--dim);border-color:var(--dim);"></div>
+      <div class="tl-label" style="color:var(--dim);">Phase 0</div>
+      <div class="tl-title">La faille existe (silencieusement)</div>
+      <div class="tl-desc">Un développeur écrit du code avec un bug. La faille existe mais personne ne le sait encore — ni le vendeur, ni les hackers.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot" style="color:var(--red);border-color:var(--red);"></div>
+      <div class="tl-label" style="color:var(--red);">Phase 1 — ZERO DAY</div>
+      <div class="tl-title">🔴 Zero-Day Vulnerability découverte</div>
+      <div class="tl-desc">Un chercheur (ou un hacker) découvre la faille. Le vendeur a eu <strong style="color:#fff;">0 jour</strong> pour la corriger. C'est la phase la plus dangereuse — le vendeur ne sait pas encore.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot" style="color:var(--red);border-color:var(--red);"></div>
+      <div class="tl-label" style="color:var(--red);">Phase 2 — ZERO DAY</div>
+      <div class="tl-title">🔴 Zero-Day Attack</div>
+      <div class="tl-desc">Des attaquants exploitent la faille avant qu'elle soit connue. Pas de défense possible basée sur les signatures — l'IDS ne peut pas la détecter. Seule l'analyse comportementale peut aider.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot" style="color:var(--orange);border-color:var(--orange);"></div>
+      <div class="tl-label" style="color:var(--orange);">Phase 3 — CVE</div>
+      <div class="tl-title">🟠 Publication CVE</div>
+      <div class="tl-desc">La faille est officiellement enregistrée dans la base CVE (cve.org). Elle reçoit un identifiant unique <strong style="color:#fff;">CVE-ANNÉE-NUMÉRO</strong> et un score CVSS. Le monde entier est maintenant informé.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot" style="color:var(--yellow);border-color:var(--yellow);"></div>
+      <div class="tl-label" style="color:var(--yellow);">Phase 4</div>
+      <div class="tl-title">🟡 Développement du patch</div>
+      <div class="tl-desc">Le vendeur développe un correctif. Entre la publication CVE et la disponibilité du patch, les systèmes restent vulnérables. C'est la fenêtre d'exposition.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot" style="color:var(--green);border-color:var(--green);"></div>
+      <div class="tl-label" style="color:var(--green);">Phase 5</div>
+      <div class="tl-title">✅ Patch disponible</div>
+      <div class="tl-desc">Le correctif est publié. Les admins système doivent l'appliquer <strong style="color:#fff;">le plus vite possible</strong>. Les systèmes non patchés restent vulnérables indéfiniment.</div>
+    </div>
+  </div>
+
+  <div class="card reveal" style="border-left:3px solid var(--cyan);max-width:700px;">
+    <div style="font-family:var(--font-head);font-size:1rem;color:var(--cyan);margin-bottom:10px;">📋 Format CVE — Comment le lire</div>
+    <div class="code-block">
+      <span class="hi">CVE-2021-44228</span>  <span class="cmt">← Log4Shell (Apache Log4j)</span><br>
+      <span class="kw">CVE</span>       <span class="cmt">= Common Vulnerabilities and Exposures</span><br>
+      <span class="kw">2021</span>      <span class="cmt">= Année de publication</span><br>
+      <span class="kw">44228</span>     <span class="cmt">= Numéro séquentiel unique</span><br><br>
+      <span class="ok">CVSS Score : 10.0 (CRITIQUE)</span><br>
+      <span class="cmt">Impact : Exécution de code à distance sans authentification</span>
+    </div>
+  </div>
+</section>
+
+<!-- IDS / IPS -->
+<section>
+  <div class="section-tag">Détection d'intrusions</div>
+  <h2>IDS vs <span>IPS</span></h2>
+
+  <div class="two-col reveal">
+    <div class="card" style="border-left:3px solid var(--blue);">
+      <div style="font-family:var(--font-head);font-size:1.2rem;color:var(--blue);margin-bottom:12px;">👁️ IDS — Intrusion Detection System</div>
+      <p style="font-size:0.87rem;color:var(--dim);line-height:1.65;margin-bottom:14px;"><strong style="color:#fff;">Passif</strong> — observe et alerte. Ne bloque rien. Placé en dehors du flux réseau (mode "miroir").</p>
+      <ul style="font-size:0.83rem;color:var(--dim);line-height:1.8;list-style:none;">
+        <li>✅ Détecte les intrusions</li>
+        <li>✅ Génère des alertes</li>
+        <li>✅ Ne peut pas être bloqué par l'attaquant</li>
+        <li>❌ Ne bloque pas les attaques</li>
+        <li>❌ Faux positifs possibles</li>
+      </ul>
+      <div style="margin-top:12px;">
+        <div class="tag" style="color:var(--blue);">NIDS (réseau)</div>
+        <div class="tag" style="color:var(--blue);">HIDS (hôte)</div>
+        <div class="tag" style="color:var(--blue);">Snort</div>
+        <div class="tag" style="color:var(--blue);">Suricata</div>
+      </div>
+    </div>
+    <div class="card" style="border-left:3px solid var(--red);">
+      <div style="font-family:var(--font-head);font-size:1.2rem;color:var(--red);margin-bottom:12px;">🛡️ IPS — Intrusion Prevention System</div>
+      <p style="font-size:0.87rem;color:var(--dim);line-height:1.65;margin-bottom:14px;"><strong style="color:#fff;">Actif</strong> — détecte ET bloque. Placé <em>en ligne</em> dans le flux réseau. Peut réinitialiser les connexions suspectes.</p>
+      <ul style="font-size:0.83rem;color:var(--dim);line-height:1.8;list-style:none;">
+        <li>✅ Détecte ET bloque en temps réel</li>
+        <li>✅ Peut modifier le trafic</li>
+        <li>❌ Peut devenir un point de défaillance</li>
+        <li>❌ Faux positifs → blocage légitime</li>
+        <li>❌ Latence ajoutée au trafic</li>
+      </ul>
+      <div style="margin-top:12px;">
+        <div class="tag" style="color:var(--red);">NIPS</div>
+        <div class="tag" style="color:var(--red);">HIPS</div>
+        <div class="tag" style="color:var(--red);">EDR</div>
+        <div class="tag" style="color:var(--red);">UTM</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card reveal" style="margin-top:14px;border-left:3px solid var(--yellow);">
+    <div style="font-family:var(--font-head);font-size:1rem;color:var(--yellow);margin-bottom:14px;">⚠️ Faux Positifs vs Faux Négatifs</div>
+    <div class="two-col" style="gap:14px;">
+      <div>
+        <div style="font-size:0.85rem;font-weight:700;color:#fff;margin-bottom:6px;">Faux Positif (False Positive)</div>
+        <div style="font-size:0.82rem;color:var(--dim);line-height:1.6;">Le système alerte pour une activité <strong style="color:#fff;">légitime</strong>. Exemple : un scan de ports fait par l'admin génère une alerte. Trop de faux positifs → les analystes ignorent les alertes (alert fatigue).</div>
+      </div>
+      <div>
+        <div style="font-size:0.85rem;font-weight:700;color:#fff;margin-bottom:6px;">Faux Négatif (False Negative)</div>
+        <div style="font-size:0.82rem;color:var(--dim);line-height:1.6;">Une vraie attaque passe <strong style="color:#fff;">sans déclencher d'alerte</strong>. C'est le scénario le pire — on croit être protégé mais on ne l'est pas.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PARE-FEU ET ZONES -->
+<section style="background:var(--bg2);">
+  <div class="section-tag">Architecture de sécurité</div>
+  <h2>Pare-feux & <span>Zones de sécurité</span></h2>
+
+  <div class="two-col reveal" style="margin-bottom:30px;">
+    <div>
+      <div class="card" style="border-left:3px solid var(--green);">
+        <div style="font-family:var(--font-head);font-size:1.1rem;color:var(--green);margin-bottom:10px;">🔥 Types de pare-feux</div>
+        <ul style="font-size:0.83rem;color:var(--dim);line-height:1.9;list-style:none;">
+          <li><strong style="color:#fff;">L3 — Filtrage de paquets</strong> : examine IPs et ports. Rapide mais basique.</li>
+          <li><strong style="color:#fff;">L4 — Stateful</strong> : suit l'état des connexions TCP. Plus intelligent.</li>
+          <li><strong style="color:#fff;">L7 — Proxy applicatif</strong> : inspecte le contenu applicatif (HTTP, DNS). Le plus sécurisé.</li>
+          <li><strong style="color:#fff;">WAF</strong> : spécialisé pour les apps web — bloque XSS, SQLi, CSRF.</li>
+          <li><strong style="color:#fff;">NGFW (Next-Gen)</strong> : combine tout + ML/IA pour détection avancée.</li>
+        </ul>
+      </div>
+      <div class="card" style="margin-top:14px;border-left:3px solid var(--cyan);">
+        <div style="font-family:var(--font-head);font-size:1.1rem;color:var(--cyan);margin-bottom:10px;">🔍 DPI — Deep Packet Inspection</div>
+        <p style="font-size:0.83rem;color:var(--dim);line-height:1.65;">Le pare-feu L7 utilise le DPI pour inspecter le <strong style="color:#fff;">contenu des paquets</strong> (pas juste les en-têtes). Il peut lire le contenu HTTP, détecter des malwares dans des fichiers, bloquer des protocoles spécifiques.</p>
+      </div>
+    </div>
+    <div>
+      <div style="font-family:var(--font-head);font-size:1rem;color:#fff;margin-bottom:16px;">🗺️ Les 7 zones de sécurité réseau</div>
+      <div class="zones">
+        <div class="zone" style="border-color:rgba(255,56,96,0.4);color:var(--red);padding:10px 16px;">
+          <span class="zone-num">Z1</span>
+          <div class="zone-info"><div class="zone-name" style="color:var(--red);">Zone Publique (Internet)</div><div class="zone-desc">Pas de confiance. Tout peut être hostile.</div></div>
+          <span class="zone-icon">🌐</span>
+        </div>
+        <div class="zone" style="border-color:rgba(255,159,67,0.4);color:var(--orange);padding:10px 16px;">
+          <span class="zone-num">Z2</span>
+          <div class="zone-info"><div class="zone-name" style="color:var(--orange);">DMZ (Zone Démilitarisée)</div><div class="zone-desc">Serveurs publics : web, mail, DNS. Isolée.</div></div>
+          <span class="zone-icon">🏢</span>
+        </div>
+        <div class="zone" style="border-color:rgba(255,211,42,0.4);color:var(--yellow);padding:10px 16px;">
+          <span class="zone-num">Z3</span>
+          <div class="zone-info"><div class="zone-name" style="color:var(--yellow);">Zone Serveurs Internes</div><div class="zone-desc">BDD, ERP, applications internes.</div></div>
+          <span class="zone-icon">🖥️</span>
+        </div>
+        <div class="zone" style="border-color:rgba(0,255,136,0.4);color:var(--green);padding:10px 16px;">
+          <span class="zone-num">Z4</span>
+          <div class="zone-info"><div class="zone-name" style="color:var(--green);">Zone Interne (LAN)</div><div class="zone-desc">Postes utilisateurs, imprimantes.</div></div>
+          <span class="zone-icon">💻</span>
+        </div>
+        <div class="zone" style="border-color:rgba(116,185,255,0.4);color:var(--blue);padding:10px 16px;">
+          <span class="zone-num">Z5</span>
+          <div class="zone-info"><div class="zone-name" style="color:var(--blue);">Zone Admin</div><div class="zone-desc">Administration système. Accès très restreint.</div></div>
+          <span class="zone-icon">🔑</span>
+        </div>
+        <div class="zone" style="border-color:rgba(162,155,254,0.4);color:var(--purple);padding:10px 16px;">
+          <span class="zone-num">Z6</span>
+          <div class="zone-info"><div class="zone-name" style="color:var(--purple);">Zone SOC</div><div class="zone-desc">Security Operations Center. Surveillance.</div></div>
+          <span class="zone-icon">👁️</span>
+        </div>
+        <div class="zone" style="border-color:rgba(0,229,255,0.4);color:var(--cyan);padding:10px 16px;">
+          <span class="zone-num">Z7</span>
+          <div class="zone-info"><div class="zone-name" style="color:var(--cyan);">Zone Industrielle (OT/ICS)</div><div class="zone-desc">SCADA, automates. Isolée au maximum.</div></div>
+          <span class="zone-icon">⚙️</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TYPES D'ATTAQUES -->
+<section>
+  <div class="section-tag">Catalogue des attaques</div>
+  <h2>Types d'<span>Attaques</span> réseau</h2>
+
+  <div class="attack-grid reveal">
+    <div class="attack-card" style="border-left-color:var(--red);">
+      <span class="attack-icon">🌊</span>
+      <div class="attack-name">DDoS — Déni de Service Distribué</div>
+      <div class="attack-desc">Des milliers de machines zombies (botnet) inondent un serveur de requêtes. Il sature et tombe. Les 3 modes : volumétrique, protocole, applicatif.</div>
+      <div class="attack-mitigation">🛡️ Mitigation : Cloudflare, scrubbing center, rate limiting, anycast</div>
+    </div>
+    <div class="attack-card" style="border-left-color:var(--orange);">
+      <span class="attack-icon">🕵️</span>
+      <div class="attack-name">MITM — Man In The Middle</div>
+      <div class="attack-desc">L'attaquant s'intercale entre deux parties pour lire et/ou modifier les échanges. Possible sur WiFi non chiffré, ARP poisoning, DNS spoofing.</div>
+      <div class="attack-mitigation">🛡️ Mitigation : HTTPS, certificats, VPN, HSTS</div>
+    </div>
+    <div class="attack-card" style="border-left-color:var(--yellow);">
+      <span class="attack-icon">🎣</span>
+      <div class="attack-name">Phishing / Spoofing</div>
+      <div class="attack-desc">Usurpation d'identité pour tromper l'utilisateur. Email qui imite sa banque, faux site web, faux numéro de téléphone. Vecteur d'attaque n°1.</div>
+      <div class="attack-mitigation">🛡️ Mitigation : SPF, DKIM, DMARC, formation utilisateurs</div>
+    </div>
+    <div class="attack-card" style="border-left-color:var(--purple);">
+      <span class="attack-icon">💀</span>
+      <div class="attack-name">Ransomware</div>
+      <div class="attack-desc">Malware qui chiffre tous tes fichiers et demande une rançon. Attaque la disponibilité. Se propage via phishing, vulnérabilités non patchées.</div>
+      <div class="attack-mitigation">🛡️ Mitigation : Sauvegardes 3-2-1, EDR, mises à jour</div>
+    </div>
+    <div class="attack-card" style="border-left-color:var(--cyan);">
+      <span class="attack-icon">🔓</span>
+      <div class="attack-name">CAM Table Flooding</div>
+      <div class="attack-desc">Remplissage de la table MAC du switch jusqu'à saturation. Le switch se comporte comme un hub et diffuse tous les paquets → écoute possible.</div>
+      <div class="attack-mitigation">🛡️ Mitigation : Port security sur les switches, limitation MAC</div>
+    </div>
+    <div class="attack-card" style="border-left-color:var(--blue);">
+      <span class="attack-icon">⚗️</span>
+      <div class="attack-name">SQL Injection</div>
+      <div class="attack-desc">Injection de commandes SQL dans un formulaire non sécurisé. Permet de lire, modifier ou supprimer des données. Ex: ' OR '1'='1</div>
+      <div class="attack-mitigation">🛡️ Mitigation : Requêtes préparées, WAF, validation des entrées</div>
+    </div>
+  </div>
+</section>
+
+<!-- CVSS CALCULATOR -->
+<section style="background:var(--bg2);">
+  <div class="section-tag">Outil interactif</div>
+  <h2>Simulateur <span>CVSS</span></h2>
+  <p style="color:var(--dim);font-size:0.9rem;margin-bottom:30px;line-height:1.65;">Déplace le curseur pour voir comment le score CVSS évolue et sa classification de gravité.</p>
+  <div style="max-width:500px;" class="reveal">
+    <div class="cvss-meter">
+      <div id="cvssScore" class="cvss-score" style="color:var(--green);">0.0</div>
+      <div id="cvssLabel" style="text-align:center;font-family:var(--font-mono);font-size:0.7rem;color:var(--green);letter-spacing:3px;text-transform:uppercase;margin-bottom:16px;">AUCUN RISQUE</div>
+      <input type="range" min="0" max="10" step="0.1" value="0" class="cvss-input" id="cvssSlider" oninput="updateCVSS(this.value)">
+      <div class="cvss-bar"><div class="cvss-needle" id="cvssNeedle" style="left:0%"></div></div>
+      <div class="cvss-labels"><span>0</span><span>4</span><span>7</span><span>9</span><span>10</span></div>
+    </div>
+    <div class="code-block" id="cvssDetail"></div>
+  </div>
+</section>
+
+<!-- QCM INTRUSION -->
+<section>
+  <div class="section-tag">Entraînement — Module 02</div>
+  <h2>QCM <span>Intrusions</span></h2>
+  <div style="max-width:700px;">
+    <div id="iqArea"></div>
+    <div style="display:flex;justify-content:space-between;margin-top:20px;align-items:center;">
+      <button onclick="prevIQ()" class="btn-sm">← Préc.</button>
+      <span id="iqNum" style="font-family:var(--font-mono);font-size:0.8rem;color:var(--dim);"></span>
+      <button onclick="nextIQ()" class="btn-sm">Suiv. →</button>
+    </div>
+  </div>
+</section>
+
+</div>
+<script>
+function updateCVSS(v) {
+  const val = parseFloat(v);
+  const needle = document.getElementById('cvssNeedle');
+  const score  = document.getElementById('cvssScore');
+  const label  = document.getElementById('cvssLabel');
+  const detail = document.getElementById('cvssDetail');
+  needle.style.left = (val / 10 * 100) + '%';
+  score.textContent = val.toFixed(1);
+  let color, cat, desc;
+  if (val === 0) { color='#546e7a'; cat='AUCUN'; desc='Aucun risque identifié.'; }
+  else if (val < 4) { color=getComputedStyle(document.documentElement).getPropertyValue('--green').trim(); cat='FAIBLE'; desc='Faible impact. Exploitation difficile ou impact limité.'; }
+  else if (val < 7) { color='#ffd32a'; cat='MOYEN'; desc='Impact modéré. Exploitation possible avec conditions.'; }
+  else if (val < 9) { color='#ff9f43'; cat='ÉLEVÉ'; desc='Impact sérieux. Exploitation relativement aisée.'; }
+  else { color='#ff3860'; cat='CRITIQUE'; desc='Impact maximal. Exploitation facile, pas d\'auth requise.'; }
+  score.style.color = color;
+  label.style.color = color;
+  label.textContent = cat;
+  detail.innerHTML = `<span style="color:${color};font-weight:700;">CVSS ${val.toFixed(1)} — ${cat}</span>\n${desc}\n\nExemple CVE à ce score :\n${val>=9?'CVE-2021-44228 (Log4Shell) — score 10.0\nExécution de code à distance, aucune auth.':val>=7?'CVE-2017-0144 (EternalBlue) — score 8.1\nUsed by WannaCry ransomware.':val>=4?'CVE-2020-1472 (Zerologon) — score 5.5\nEscalade de privilèges Active Directory.':'CVE mineure — impact cosmétique ou local.'}`;
+}
+updateCVSS(0);
+
+const iqData = [
+  { q:"Qu'est-ce qu'un Zero-Day Attack ?", opts:["Une attaque qui échoue","Une attaque exploitant une faille inconnue du vendeur — aucun patch disponible","Une attaque de nuit","Une attaque dure 0 secondes"], correct:1, expl:"<strong>Zero-Day Attack</strong> : exploitation d'une vulnérabilité avant que le vendeur en soit informé. Le vendeur a eu <strong>0 jours</strong> pour la corriger. Très dangereux car les IDS basés sur signatures ne peuvent pas la détecter." },
+  { q:"Quelle est la différence entre NIDS et HIDS ?", opts:["Aucune différence","NIDS surveille le réseau, HIDS surveille un hôte spécifique","NIDS est plus cher","HIDS est plus ancien"], correct:1, expl:"<strong>NIDS (Network IDS)</strong> : surveille le trafic réseau global. <strong>HIDS (Host IDS)</strong> : surveille un système spécifique (logs, fichiers système, processus). EDR = forme moderne de HIDS." },
+  { q:"Pourquoi la DMZ est-elle utile ?", opts:["Pour accélérer le réseau","Pour isoler les serveurs publics du réseau interne","Pour stocker des données sensibles","Pour remplacer le pare-feu"], correct:1, expl:"La <strong>DMZ</strong> crée une zone tampon entre Internet et le réseau interne. Si un serveur web DMZ est compromis, l'attaquant n'a pas accès direct au réseau interne. Le pare-feu interne l'en bloque." },
+  { q:"Qu'est-ce qu'un faux positif en IDS ?", opts:["Une vraie attaque détectée","Un trafic légitime détecté comme une attaque","Une attaque non détectée","Un bug dans l'IDS"], correct:1, expl:"<strong>Faux positif</strong> : le système alerte sur du trafic légitime. Trop de faux positifs = alert fatigue (les analystes ignorent les alertes). <strong>Faux négatif</strong> = attaque réelle non détectée (pire cas)." },
+  { q:"Que signifie NVD en cybersécurité ?", opts:["Network Vulnerability Detection","National Vulnerability Database","New Virus Definition","Network Video Display"], correct:1, expl:"<strong>NVD = National Vulnerability Database</strong> (NIST). Enrichit les CVE avec des scores CVSS, des vecteurs d'attaque, des références et des patches. URL : nvd.nist.gov" },
+];
+let iqIdx=0, iqAnswered=[];
+function renderIQ() {
+  const q=iqData[iqIdx];
+  document.getElementById('iqNum').textContent=`${iqIdx+1} / ${iqData.length}`;
+  document.getElementById('iqArea').innerHTML=`<div class="card"><div style="font-family:var(--font-mono);font-size:0.65rem;color:var(--red);letter-spacing:3px;margin-bottom:12px;">QUESTION ${iqIdx+1}</div><div style="font-size:1rem;font-weight:600;color:#fff;margin-bottom:20px;line-height:1.5;">${q.q}</div>${q.opts.map((o,i)=>`<div onclick="answerIQ(${i})" style="background:rgba(0,0,0,0.3);border:1px solid ${iqAnswered[iqIdx]!==undefined?(i===q.correct?'var(--green)':iqAnswered[iqIdx]===i?'var(--red)':'rgba(255,255,255,0.08)'):'rgba(255,255,255,0.08)'};border-radius:4px;padding:12px 16px;margin-bottom:10px;cursor:${iqAnswered[iqIdx]!==undefined?'default':'pointer'};font-size:0.88rem;color:${iqAnswered[iqIdx]!==undefined?(i===q.correct?'var(--green)':iqAnswered[iqIdx]===i?'var(--red)':'var(--dim)'):'var(--text)'};display:flex;align-items:center;gap:10px;"><span style="width:24px;height:24px;border-radius:50%;border:1px solid currentColor;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:0.7rem;flex-shrink:0;">${['A','B','C','D'][i]}</span>${o}</div>`).join('')}${iqAnswered[iqIdx]!==undefined?`<div style="padding:14px;background:rgba(0,0,0,0.4);border-left:3px solid var(--green);font-size:0.85rem;color:var(--text);line-height:1.65;margin-top:8px;">${iqAnswered[iqIdx]===q.correct?'✅ Correct ! ':'❌ Incorrect. '}${q.expl}</div>`:''}</div>`;
+}
+function answerIQ(i){if(iqAnswered[iqIdx]!==undefined)return;iqAnswered[iqIdx]=i;renderIQ();}
+function nextIQ(){if(iqIdx<iqData.length-1){iqIdx++;renderIQ();}}
+function prevIQ(){if(iqIdx>0){iqIdx--;renderIQ();}}
+renderIQ();
+
+const obs=new IntersectionObserver(e=>e.forEach(x=>x.isIntersecting&&x.target.classList.add('visible')),{threshold:0.1});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
